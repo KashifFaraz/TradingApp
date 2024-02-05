@@ -31,6 +31,10 @@ public partial class TradingAppContext : DbContext
 
     public virtual DbSet<MeasureUnit> MeasureUnits { get; set; }
 
+    public virtual DbSet<Payment> Payments { get; set; }
+
+    public virtual DbSet<PaymentReconciliation> PaymentReconciliations { get; set; }
+
     public virtual DbSet<Stakeholder> Stakeholders { get; set; }
 
     public virtual DbSet<StakeholderType> StakeholderTypes { get; set; }
@@ -45,7 +49,77 @@ public partial class TradingAppContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-       
+        modelBuilder.Entity<AppRole>(entity =>
+        {
+            entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
+                .IsUnique()
+                .HasFilter("([NormalizedName] IS NOT NULL)");
+
+            entity.Property(e => e.Name).HasMaxLength(256);
+            entity.Property(e => e.NormalizedName).HasMaxLength(256);
+        });
+
+        modelBuilder.Entity<AppRoleClaim>(entity =>
+        {
+            entity.HasIndex(e => e.RoleId, "IX_AppRoleClaims_RoleId");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.AppRoleClaims).HasForeignKey(d => d.RoleId);
+        });
+
+        modelBuilder.Entity<AppUser>(entity =>
+        {
+            entity.HasIndex(e => e.NormalizedEmail, "EmailIndex");
+
+            entity.HasIndex(e => e.NormalizedUserName, "UserNameIndex")
+                .IsUnique()
+                .HasFilter("([NormalizedUserName] IS NOT NULL)");
+
+            entity.Property(e => e.Email).HasMaxLength(256);
+            entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
+            entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
+            entity.Property(e => e.UserName).HasMaxLength(256);
+
+            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "AppUserRole",
+                    r => r.HasOne<AppRole>().WithMany().HasForeignKey("RoleId"),
+                    l => l.HasOne<AppUser>().WithMany().HasForeignKey("UserId"),
+                    j =>
+                    {
+                        j.HasKey("UserId", "RoleId");
+                        j.ToTable("AppUserRoles");
+                        j.HasIndex(new[] { "RoleId" }, "IX_AppUserRoles_RoleId");
+                    });
+        });
+
+        modelBuilder.Entity<AppUserClaim>(entity =>
+        {
+            entity.HasIndex(e => e.UserId, "IX_AppUserClaims_UserId");
+
+            entity.HasOne(d => d.User).WithMany(p => p.AppUserClaims).HasForeignKey(d => d.UserId);
+        });
+
+        modelBuilder.Entity<AppUserLogin>(entity =>
+        {
+            entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
+
+            entity.HasIndex(e => e.UserId, "IX_AppUserLogins_UserId");
+
+            entity.Property(e => e.LoginProvider).HasMaxLength(128);
+            entity.Property(e => e.ProviderKey).HasMaxLength(128);
+
+            entity.HasOne(d => d.User).WithMany(p => p.AppUserLogins).HasForeignKey(d => d.UserId);
+        });
+
+        modelBuilder.Entity<AppUserToken>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
+
+            entity.Property(e => e.LoginProvider).HasMaxLength(128);
+            entity.Property(e => e.Name).HasMaxLength(128);
+
+            entity.HasOne(d => d.User).WithMany(p => p.AppUserTokens).HasForeignKey(d => d.UserId);
+        });
 
         modelBuilder.Entity<Item>(entity =>
         {
@@ -70,6 +144,41 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(10)
                 .IsFixedLength();
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.ToTable("Payment");
+
+            entity.Property(e => e.AccountTitle).HasMaxLength(50);
+            entity.Property(e => e.BankName).HasMaxLength(50);
+            entity.Property(e => e.CraetedOn).HasColumnType("datetime");
+            entity.Property(e => e.CustomId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.DocDate).HasColumnType("datetime");
+            entity.Property(e => e.DueDate).HasColumnType("datetime");
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.SubTotal).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UnreconciledAmount).HasColumnType("decimal(18, 2)");
+        });
+
+        modelBuilder.Entity<PaymentReconciliation>(entity =>
+        {
+            entity.ToTable("PaymentReconciliation");
+
+            entity.Property(e => e.CraetedOn).HasColumnType("datetime");
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Payment).WithMany(p => p.PaymentReconciliations)
+                .HasForeignKey(d => d.Paymentid)
+                .HasConstraintName("FK_PaymentReconciliation_Payment");
+
+            entity.HasOne(d => d.TradingDocument).WithMany(p => p.PaymentReconciliations)
+                .HasForeignKey(d => d.TradingDocumentId)
+                .HasConstraintName("FK_PaymentReconciliation_TradingDocument");
         });
 
         modelBuilder.Entity<Stakeholder>(entity =>
@@ -97,6 +206,9 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.AccountTitle).HasMaxLength(50);
             entity.Property(e => e.BankName).HasMaxLength(50);
             entity.Property(e => e.CraetedOn).HasColumnType("datetime");
+            entity.Property(e => e.CustomId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.DocDate).HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("datetime");
@@ -104,6 +216,7 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.Rfqid).HasColumnName("RFQId");
             entity.Property(e => e.SubTotal).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UnreconciledAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Invoice).WithMany(p => p.InverseInvoice)
                 .HasForeignKey(d => d.InvoiceId)
@@ -127,7 +240,7 @@ public partial class TradingAppContext : DbContext
 
             entity.HasOne(d => d.Stakeholder).WithMany(p => p.TradingDocuments)
                 .HasForeignKey(d => d.StakeholderId)
-                .HasConstraintName("FK_TradingDocument_StackholderType");
+                .HasConstraintName("FK_TradingDocument_Stackholder");
         });
 
         modelBuilder.Entity<TradingDocumentDetail>(entity =>

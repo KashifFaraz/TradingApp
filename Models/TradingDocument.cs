@@ -7,7 +7,7 @@ public partial class TradingDocument
 {
     public int Id { get; set; }
 
-    public int? CustomId { get; set; }
+    public string? CustomId { get; set; }
 
     public DateTime? DocDate { get; set; }
 
@@ -35,6 +35,10 @@ public partial class TradingDocument
 
     public decimal? TotalAmount { get; set; }
 
+    public decimal? UnreconciledAmount { get; set; }
+
+    public byte? PaymentReconciliationStatus { get; set; }
+
     public int? CreatedBy { get; set; }
 
     public DateTime? CraetedOn { get; set; }
@@ -55,6 +59,8 @@ public partial class TradingDocument
 
     public virtual TradingDocument? Invoice { get; set; }
 
+    public virtual ICollection<PaymentReconciliation> PaymentReconciliations { get; set; } = new List<PaymentReconciliation>();
+
     public virtual TradingDocument? PurchaseOrder { get; set; }
 
     public virtual TradingDocument? Quote { get; set; }
@@ -63,7 +69,7 @@ public partial class TradingDocument
 
     public virtual TradingDocument? SalesOder { get; set; }
 
-    public virtual StakeholderType? Stakeholder { get; set; }
+    public virtual Stakeholder? Stakeholder { get; set; }
 
     public virtual ICollection<TradingDocumentDetail> TradingDocumentDetails { get; set; } = new List<TradingDocumentDetail>();
 }

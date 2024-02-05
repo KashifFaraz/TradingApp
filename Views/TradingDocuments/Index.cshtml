@@ -1,0 +1,125 @@
+﻿@using System.Globalization;
+@model IEnumerable<TradingApp.Models.TradingDocument>
+
+@{
+    ViewData["Title"] = "Invoice";
+}
+
+<h1>Invoice List</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DocDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BankName)
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AccountTitle)
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DueDate)
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SubTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalAmount)
+            </th>
+
+            @* <th>
+                @Html.DisplayNameFor(model => model.InvoiceId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PurchaseOrderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quote)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Rfqid)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SalesOderId)
+            </th> *@
+            <th>
+                @Html.DisplayNameFor(model => model.StakeholderId)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CustomId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DocDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BankName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AccountTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DueDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubTotal)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalAmount)
+            </td>
+           
+           @*  <td>
+                @Html.DisplayFor(modelItem => item.Invoice.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PurchaseOrder.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quote.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rfq.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SalesOder.Id)
+            </td> *@
+            <td>
+                @Html.DisplayFor(modelItem => item.Stakeholder.Name)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

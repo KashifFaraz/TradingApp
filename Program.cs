@@ -17,7 +17,10 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddViewOptions(options =>
+{
+    options.HtmlHelperOptions.ClientValidationEnabled = true;
+});
 
 var app = builder.Build();
 
@@ -43,6 +46,14 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Add a more specific route for Invoice
+app.MapControllerRoute(
+    name: "invoice",
+    pattern: "Invoice/{action=Index}/{id?}",
+    defaults: new { controller = "TradingDocuments" });
+
 app.MapRazorPages();
+
 
 app.Run();

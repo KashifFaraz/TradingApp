@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace TradingApp.Models;
 
-public partial class Stakeholder
+public partial class PaymentReconciliation
 {
     public int Id { get; set; }
 
-    public string? Name { get; set; }
+    public int? Paymentid { get; set; }
 
-    public int? Type { get; set; }
+    public int? TradingDocumentId { get; set; }
+
+    public decimal? Amount { get; set; }
 
     public int? CreatedBy { get; set; }
 
@@ -19,5 +21,7 @@ public partial class Stakeholder
 
     public DateTime? EditedOn { get; set; }
 
-    public virtual ICollection<TradingDocument> TradingDocuments { get; set; } = new List<TradingDocument>();
+    public virtual Payment? Payment { get; set; }
+
+    public virtual TradingDocument? TradingDocument { get; set; }
 }

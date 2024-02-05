@@ -1,0 +1,244 @@
+﻿@model TradingApp.Models.TradingDocument
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+<h4>Invoice</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div class="col-md-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="CustomId" class="control-label"></label>
+                    <input asp-for="CustomId" class="form-control" />
+                    <span asp-validation-for="CustomId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DocDate" class="control-label"></label>
+                    <input asp-for="DocDate" class="form-control" type="date" />
+                    <span asp-validation-for="DocDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="StakeholderId" class="control-label"></label>
+                    @Html.DropDownListFor(model => model.StakeholderId, (SelectList)ViewData["Stakeholder"], "-- Select Stakeholder --", new { @class = "form-control" })
+                    <span asp-validation-for="StakeholderId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="BankName" class="control-label"></label>
+                    <input asp-for="BankName" class="form-control" />
+                    <span asp-validation-for="BankName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AccountTitle" class="control-label"></label>
+                    <input asp-for="AccountTitle" class="form-control" />
+                    <span asp-validation-for="AccountTitle" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Rfqid" class="control-label"></label>
+                    <select asp-for="Rfqid" class="form-control" asp-items="ViewBag.Rfqid"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DueDate" class="control-label"></label>
+                    <input asp-for="DueDate" class="form-control" />
+                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+               @*  <div class="form-group">
+                    <label asp-for="QuoteId" class="control-label"></label>
+                    <select asp-for="QuoteId" class="form-control" asp-items="ViewBag.QuoteId"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PurchaseOrderId" class="control-label"></label>
+                    <select asp-for="PurchaseOrderId" class="form-control" asp-items="ViewBag.PurchaseOrderId"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SalesOderId" class="control-label"></label>
+                    <select asp-for="SalesOderId" class="form-control" asp-items="ViewBag.SalesOderId"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="InvoiceId" class="control-label"></label>
+                    <select asp-for="InvoiceId" class="form-control" asp-items="ViewBag.InvoiceId"></select>
+                </div> *@
+                <div class="form-group">
+                    <label asp-for="SubTotal" class="control-label"></label>
+                    <input asp-for="SubTotal" class="form-control" />
+                    <span asp-validation-for="SubTotal" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="TotalAmount" class="control-label"></label>
+                    <input asp-for="TotalAmount" class="form-control" />
+                    <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CreatedBy" class="control-label"></label>
+                    <input asp-for="CreatedBy" class="form-control" />
+                    <span asp-validation-for="CreatedBy" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CraetedOn" class="control-label"></label>
+                    <input asp-for="CraetedOn" class="form-control" />
+                    <span asp-validation-for="CraetedOn" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EditedBy" class="control-label"></label>
+                    <input asp-for="EditedBy" class="form-control" />
+                    <span asp-validation-for="EditedBy" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EditedOn" class="control-label"></label>
+                    <input asp-for="EditedOn" class="form-control" />
+                    <span asp-validation-for="EditedOn" class="text-danger"></span>
+                </div>
+            </div>
+            @* ---line code-- *@
+
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <!-- Existing form fields -->
+                    <!-- New section for TradingDocumentDetails -->
+                    <h4>TradingDocumentDetails</h4>
+                    <div id="tradingDocumentDetailsContainer">
+                        <!-- Placeholder for dynamically added rows -->
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row</button>
+
+
+                </div>
+            </div>
+
+
+
+
+            @* --line code --- *@
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    <script>
+        // Global variable to keep track of the current index
+        var currentIndex = 0;
+
+        // JavaScript function to add a new row for TradingDocumentDetails
+        function addTradingDocumentDetail() {
+            var container = document.getElementById('tradingDocumentDetailsContainer');
+            var newRow = document.createElement('div');
+            newRow.className = 'row';
+            newRow.innerHTML = `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Item</th>
+                                    <th>Unit Price</th>
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="form-group">
+                                            <label asp-for="TradingDocumentDetails[${currentIndex}].Description" class="control-label"></label>
+                                            <input name="TradingDocumentDetails[${currentIndex}].Description" class="form-control" />
+                                            <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Description" class="text-danger"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <label asp-for="TradingDocumentDetails[${currentIndex}].ItemId" class="control-label"></label>
+                                            <select name="TradingDocumentDetails[${currentIndex}].ItemId" class="form-control">
+                                                <option value="">-- Select Item --</option>
+                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewData["Item"])
+                                                {
+                                                  <option value="@item.Value">@item.Text</option>
+                                                }
+                                            </select>
+                                            <span asp-validation-for="TradingDocumentDetails[${currentIndex}].ItemId" class="text-danger"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <!-- Add more form fields for TradingDocumentDetails as needed -->
+                                        <div class="form-group">
+                                            <label asp-for="TradingDocumentDetails[${currentIndex}].UnitPrice" class="control-label"></label>
+                                            <input name="TradingDocumentDetails[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                            <span asp-validation-for="TradingDocumentDetails[${currentIndex}].UnitPrice" class="text-danger"></span>
+                                        </div>
+                                    </td>
+                                   
+                                    <td>
+                                        <div class="form-group">
+                                            <label asp-for="TradingDocumentDetails[${currentIndex}].Quantity" class="control-label"></label>
+                                            <input name="TradingDocumentDetails[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                            <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Quantity" class="text-danger"></span>
+                                        </div>
+                                    </td>
+                                     <td>
+                                        <div class="form-group">
+                                            <label asp-for="TradingDocumentDetails[${currentIndex}].Amount" class="control-label"></label>
+                                            <input name="TradingDocumentDetails[${currentIndex}].Amount" class="form-control" readonly  />
+                                            <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Amount" class="text-danger"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-danger" onclick="removeTradingDocumentDetail(this)">Remove Row</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+            container.appendChild(newRow);
+
+            // Increment the index for the next row
+            currentIndex++;
+        }
+
+
+        // JavaScript function to remove a row for TradingDocumentDetails
+        function removeTradingDocumentDetail(button) {
+            var row = button.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        // Function to calculate Amount based on UnitPrice and Quantity
+        function calculateAmount(index) {
+            var unitPrice = parseFloat(document.getElementsByName(`TradingDocumentDetails[${index}].UnitPrice`)[0].value) || 0;
+            var quantity = parseFloat(document.getElementsByName(`TradingDocumentDetails[${index}].Quantity`)[0].value) || 0;
+            var amount = unitPrice * quantity;
+            document.getElementsByName(`TradingDocumentDetails[${index}].Amount`)[0].value = amount.toFixed(2);
+        }
+
+    </script>
+
+
+
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+

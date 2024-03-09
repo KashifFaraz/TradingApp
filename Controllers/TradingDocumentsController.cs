@@ -58,8 +58,40 @@ namespace TradingApp.Controllers
         }
 
         // GET: TradingDocuments/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? id)
         {
+            if (id is not null && id != 0)
+            {
+                if (_context.TradingDocuments == null)
+                {
+                    return NotFound();
+                }
+                var tradingDocument = await _context.TradingDocuments
+                .Include(t => t.TradingDocumentDetails)
+                .Include(t => t.Invoice)
+                .Include(t => t.PurchaseOrder)
+                .Include(t => t.Quote)
+                .Include(t => t.Rfq)
+                .Include(t => t.SalesOder)
+                .Include(t => t.Stakeholder)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+                if (tradingDocument == null)
+                {
+                    return NotFound();
+                }
+                ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
+                ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
+                ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
+                ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
+                ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
+                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
+                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
+                ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+
+                return View(tradingDocument);
+
+            }
             ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
             ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
             ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
@@ -77,14 +109,55 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn, TradingDocumentDetails")] TradingDocument tradingDocument)
+        public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn, TradingDocumentDetails")] TradingDocument tradingDocument)
         {
+            if (id is not null && id != 0)
+            {
+                if (id != tradingDocument.Id)
+                {
+                    return NotFound();
+                }
+
+                if (ModelState.IsValid)
+                {
+                    try
+                    {
+                        _context.Update(tradingDocument);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!TradingDocumentExists(tradingDocument.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
+                ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
+                ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
+                ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
+                ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
+                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
+                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
+                ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+
+                return View(tradingDocument);
+
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(tradingDocument);
-                await _context.SaveChangesAsync();
+              var a =  await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+          
             ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
             ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
             ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);

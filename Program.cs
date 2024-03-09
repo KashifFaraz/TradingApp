@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 using TradingApp.Data;
 using TradingApp.Models;
 
@@ -19,7 +22,18 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews().AddViewOptions(options =>
 {
+    
     options.HtmlHelperOptions.ClientValidationEnabled = true;
+}
+).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+
+});
+// Configure the default display format for DateTime properties
+builder.Services.Configure<MvcOptions>(options =>
+{
+    options.ModelMetadataDetailsProviders.Add(new DateTimeFormatMetadataProvider());
 });
 
 var app = builder.Build();
@@ -57,3 +71,15 @@ app.MapRazorPages();
 
 
 app.Run();
+public class DateTimeFormatMetadataProvider : IDisplayMetadataProvider
+{
+    public void CreateDisplayMetadata(DisplayMetadataProviderContext context)
+    {
+        if (context?.Key.MetadataKind == ModelMetadataKind.Property &&
+            context?.Key.ModelType == typeof(DateTime))
+        {
+            context.DisplayMetadata.NullDisplayText = "";
+            context.DisplayMetadata.DisplayFormatString = "{0:d}";
+        }
+    }
+}

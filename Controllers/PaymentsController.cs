@@ -57,7 +57,7 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,DueDate,PaymentType,Description,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn")] Payment payment)
+        public async Task<IActionResult> Create([Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,DueDate,PaymentType,Description,SubTotal,TotalAmount,InvoiceId,CreatedBy,CraetedOn,EditedBy,EditedOn")] Payment payment)
         {
             if (ModelState.IsValid)
             {

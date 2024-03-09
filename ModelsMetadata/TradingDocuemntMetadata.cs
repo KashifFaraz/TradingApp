@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using TradingApp.Models;
 
@@ -27,7 +28,7 @@ namespace TradingApp.Models
         [Display(Name = "RFQ")]
         public int? Rfqid { get; set; }
         [Display(Name = "Due Date")]
-
+        [DisplayFormat(DataFormatString = "{0:d}", NullDisplayText = "")]
         public DateTime? DueDate { get; set; }
 
         public string? Description { get; set; }
@@ -52,5 +53,22 @@ namespace TradingApp.Models
         public int? EditedBy { get; set; }
         [Display(Name = "Edited On")]
         public DateTime? EditedOn { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<TradingDocument> InverseInvoice { get; set; } = new List<TradingDocument>();
+
+        [JsonIgnore]
+        public virtual ICollection<TradingDocument> InversePurchaseOrder { get; set; } = new List<TradingDocument>();
+
+        [JsonIgnore]
+        public virtual ICollection<TradingDocument> InverseQuote { get; set; } = new List<TradingDocument>();
+
+        [JsonIgnore]
+        public virtual ICollection<TradingDocument> InverseRfq { get; set; } = new List<TradingDocument>();
+
+        [JsonIgnore]
+        public virtual ICollection<TradingDocument> InverseSalesOder { get; set; } = new List<TradingDocument>();
+
+
     }
 }

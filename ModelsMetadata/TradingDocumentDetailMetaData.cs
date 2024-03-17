@@ -13,6 +13,9 @@ namespace TradingApp.Models
     {
         [Required]
         public decimal? UnitPrice { get; set; }
+        [Required]
+        public int? Quantity { get; set; }
+
         [JsonIgnore]
         public virtual TradingDocument? Master { get; set; }
 

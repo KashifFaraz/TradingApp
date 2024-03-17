@@ -42,6 +42,7 @@ namespace TradingApp.Controllers
 
             var tradingDocument = await _context.TradingDocuments
                 .Include(t => t.TradingDocumentDetails)
+                .ThenInclude(t=>t.Item)
                 .Include(t => t.Invoice)
                 .Include(t => t.PurchaseOrder)
                 .Include(t => t.Quote)
@@ -111,6 +112,28 @@ namespace TradingApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn, TradingDocumentDetails")] TradingDocument tradingDocument)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
+                ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
+                ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
+                ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
+                ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
+                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
+                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
+                ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+
+                return View(tradingDocument);
+            }
+
+            foreach (var item in tradingDocument.TradingDocumentDetails)
+            {
+                item.Amount = item.UnitPrice* item.Quantity;
+            }
+            
+            tradingDocument.SubTotal= tradingDocument.TradingDocumentDetails.Sum(x=>x.Amount);
+            tradingDocument.TotalAmount = tradingDocument.TradingDocumentDetails.Sum(x => x.Amount);
+
             if (id is not null && id != 0)
             {
                 if (id != tradingDocument.Id)

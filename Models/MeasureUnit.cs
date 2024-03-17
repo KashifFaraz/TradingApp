@@ -9,5 +9,5 @@ public partial class MeasureUnit
 
     public string? Name { get; set; }
 
-    public virtual Item? Item { get; set; }
+    public virtual ICollection<Item> Items { get; set; } = new List<Item>();
 }

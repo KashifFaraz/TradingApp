@@ -21,7 +21,7 @@ public partial class Item
 
     public int? SaleUnit { get; set; }
 
-    public virtual MeasureUnit IdNavigation { get; set; } = null!;
+    public virtual MeasureUnit? SaleUnitNavigation { get; set; }
 
     public virtual ICollection<TradingDocumentDetail> TradingDocumentDetails { get; set; } = new List<TradingDocumentDetail>();
 }

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using TradingApp.Models;
+using TradingApp.Utility;
 
 namespace TradingApp.Models
 {
@@ -19,6 +20,7 @@ namespace TradingApp.Models
         [Display(Name = "Doc. Date")]
         [DisplayFormat(DataFormatString = "{0:d}", NullDisplayText = "")]
         public DateTime? DocDate { get; set; }
+        [Required]
         [Display(Name = "Stakeholder")]
         public int? StakeholderId { get; set; }
         [Display(Name = "Bank Name")]
@@ -68,6 +70,10 @@ namespace TradingApp.Models
 
         [JsonIgnore]
         public virtual ICollection<TradingDocument> InverseSalesOder { get; set; } = new List<TradingDocument>();
+        [Required]
+        [AtLeastOneItem]
+        public virtual ICollection<TradingDocumentDetail> TradingDocumentDetails { get; set; } = new List<TradingDocumentDetail>();
+
 
 
     }

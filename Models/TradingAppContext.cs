@@ -125,15 +125,13 @@ public partial class TradingAppContext : DbContext
         {
             entity.ToTable("Item");
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.CraetedOn).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.EditedOn).HasColumnType("datetime");
             entity.Property(e => e.Name).HasMaxLength(100);
 
-            entity.HasOne(d => d.IdNavigation).WithOne(p => p.Item)
-                .HasForeignKey<Item>(d => d.Id)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.SaleUnitNavigation).WithMany(p => p.Items)
+                .HasForeignKey(d => d.SaleUnit)
                 .HasConstraintName("FK_Item_MeasureUnit");
         });
 
@@ -169,6 +167,7 @@ public partial class TradingAppContext : DbContext
         {
             entity.ToTable("PaymentReconciliation");
 
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CraetedOn).HasColumnType("datetime");
             entity.Property(e => e.EditedOn).HasColumnType("datetime");
 

@@ -4,21 +4,35 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-<h4>Invoice</h4>
+<h1>Invoice</h1>
 <hr />
 <div class="row">
     <div class="col-md-12">
-        <form asp-action="Create">
+        <form id="tradingForm" asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <table class="model-state">
+                @foreach (var item in ViewContext.ViewData.ModelState)
+                {
+                    if (item.Value.Errors.Any())
+                    {
+                        <tr>
+                            <td><b>@item.Key</b></td>
+                            <td>@((item.Value == null || item.Value == null) ? "<null>" : item.Value.RawValue)</td>
+                            <td>@(string.Join("; ", item.Value.Errors.Select(x => x.ErrorMessage)))</td>
+                        </tr>
+                    }
+                }
+            </table>
+
             <div class="col-md-4">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id"  />
+                <input type="hidden" asp-for="Id" />
 
-                <div class="form-group">
-                    <label asp-for="CustomId" class="control-label"></label>
-                    <input asp-for="CustomId" class="form-control" />
-                    <span asp-validation-for="CustomId" class="text-danger"></span>
-                </div>
+                @*  <div class="form-group">
+                <label asp-for="CustomId" class="control-label"></label>
+                <input asp-for="CustomId" class="form-control" />
+                <span asp-validation-for="CustomId" class="text-danger"></span>
+                </div> *@
 
                 <div class="form-group">
                     <label asp-for="DocDate" class="control-label"></label>
@@ -71,16 +85,16 @@
                 <label asp-for="InvoiceId" class="control-label"></label>
                 <select asp-for="InvoiceId" class="form-control" asp-items="ViewBag.InvoiceId"></select>
                 </div> *@
-                <div class="form-group">
-                    <label asp-for="SubTotal" class="control-label"></label>
-                    <input asp-for="SubTotal" class="form-control" />
-                    <span asp-validation-for="SubTotal" class="text-danger"></span>
+                @*  <div class="form-group">
+                <label asp-for="SubTotal" class="control-label"></label>
+                <input asp-for="SubTotal" class="form-control" />
+                <span asp-validation-for="SubTotal" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="TotalAmount" class="control-label"></label>
-                    <input asp-for="TotalAmount" class="form-control" />
-                    <span asp-validation-for="TotalAmount" class="text-danger"></span>
-                </div>
+                <label asp-for="TotalAmount" class="control-label"></label>
+                <input asp-for="TotalAmount" class="form-control" />
+                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                </div> *@
                 @*   <div class="form-group">
                 <label asp-for="CreatedBy" class="control-label"></label>
                 <input asp-for="CreatedBy" class="form-control" />
@@ -126,6 +140,7 @@
                                         <div class="form-group">
                                             <label asp-for="@Model.TradingDocumentDetails.ElementAt(i).Description" class="control-label"></label>
                                             <input name="TradingDocumentDetails[@i].Description" class="form-control" value="@Model.TradingDocumentDetails.ElementAt(i).Description" />
+
                                             <span asp-validation-for="@Model.TradingDocumentDetails.ElementAt(i).Description" class="text-danger"></span>
                                         </div>
                                     </td>
@@ -136,8 +151,14 @@
                                                 <option value="">-- Select Item --</option>
                                                 @foreach (var item in (IEnumerable<SelectListItem>)ViewData["Item"])
                                                 {
-                                                    <option value="@item.Value" selected="@(item.Value == Model.TradingDocumentDetails.ElementAt(i).ItemId.ToString() ? "selected" : "")">@item.Text</option>
-
+                                                    if (item.Value == Model.TradingDocumentDetails.ElementAt(i).ItemId.ToString())
+                                                    {
+                                                        <option value="@item.Value" selected>@item.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.Value">@item.Text</option>
+                                                    }
                                                 }
                                             </select>
                                             <span asp-validation-for="@Model.TradingDocumentDetails.ElementAt(i).ItemId" class="text-danger"></span>
@@ -147,7 +168,15 @@
                                         <div class="form-group">
                                             <label asp-for="@Model.TradingDocumentDetails.ElementAt(i).UnitPrice" class="control-label"></label>
                                             <input name="TradingDocumentDetails[@i].UnitPrice" class="form-control" value="@Model.TradingDocumentDetails.ElementAt(i).UnitPrice" oninput="calculateAmount(@i)" />
-                                            <span asp-validation-for="@Model.TradingDocumentDetails.ElementAt(i).UnitPrice" class="text-danger"></span>
+                                            @* <span asp-validation-for="TradingDocumentDetails[@i].UnitPrice" class="text-danger"></span> *@
+                                            <span class="text-danger field-validation-valid" data-valmsg-for="TradingDocumentDetails[@i].UnitPrice" data-valmsg-replace="true"></span>
+                                            @* <span asp-validation-for="@Model.TradingDocumentDetails.ElementAt(i).UnitPrice" class="text-danger"></span> *@
+
+                                            @* <span asp-validation-for="@($"TradingDocumentDetails[{i}].UnitPrice")" class="text-danger"></span> *@
+
+
+                                            @*                                             <div asp-validation-summary="All" class="text-danger"></div> *@
+
                                         </div>
                                     </td>
                                     <td>
@@ -176,31 +205,42 @@
 
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-md-12">
-
-                    <!-- Existing form fields -->
-                    <!-- New section for TradingDocumentDetails -->
-                    <h4>Invoice Lines</h4>
+            <div class="mb-3">
+                <div class="row">
                     <div id="tradingDocumentDetailsContainer">
                         <!-- Placeholder for dynamically added rows -->
                     </div>
-
-                    <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row</button>
+                    <div class="col text-start">
+                        <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row </button>
+                    </div>
                 </div>
-
-
+            </div>
+            <div class="mt-3">
+                <div class="row">
+                    <div class="col text-end">
+                        <h4>Subtotal: <span id="subtotalAmount">0.00</span></h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-end">
+                        <h4>Grand Total: <span id="grandTotalAmount">0.00</span></h4>
+                    </div>
+                </div>
             </div>
 
-            <div id="itemData" data-items="@Json.Serialize(ViewData["Item"])"></div>
+
+
+
 
 
 
             @* --line code --- *@
-
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="row">
+                <div class="col-md-6  mb-3">
+                    <div class="form-group">
+                        <input type="submit" value="Save" class="btn btn-primary" id="saveButton" />
+                    </div>
+                </div>
             </div>
 
         </form>
@@ -213,33 +253,94 @@
 
 @section Scripts {
     <script>
+        function initializeValidation() {
+            $('form').removeData('validator');
+            $('form').removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse('#tradingForm');
+            // Initialize jQuery validation
+            var validator = $('form').validate();
 
-        // Retrieve the data attribute from the HTML element
-        var itemDataElement = document.getElementById('itemData');
+            // Log the validator object
+            console.log(validator);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add click event listener to the Save button
+            document.getElementById('saveButton').addEventListener('click', function () {
+                initializeValidation();
+                $.validator.unobtrusive.parse(".target");
+                $("#tradingForm").removeData("validator").removeData("unobtrusiveValidation");
+                $.validator.unobtrusive.parse("#tradingForm");
 
-        // Parse the JSON data from the data attribute
-        var itemData = JSON.parse(itemDataElement.dataset.items);
 
-        // Reference the select element
-        var selectElement = document.getElementById('itemSelect');
 
-        // Iterate over the itemData and add options to the select element
-        itemData.forEach(function (item) {
-            var option = document.createElement('option');
-            option.value = item.Value;
-            option.textContent = item.Text;
-            selectElement.appendChild(option);
+
+                // Access the validator object
+                var validator = $('#tradingForm').validate();
+
+
+                // Ensure that the rules object exists for the specified input field
+                if (!validator.settings.rules['TradingDocumentDetails[0].UnitPrice']) {
+                    validator.settings.rules['TradingDocumentDetails[0].UnitPrice'] = {}; // Create rules object if it doesn't exist
+                }
+
+                // Add new validation rules
+                validator.settings.rules['TradingDocumentDetails[0].UnitPrice']['required'] = true;
+                // Add more validation rules as needed
+
+                // Optionally, add messages for the new validation rules
+                validator.settings.messages['TradingDocumentDetails[0].UnitPrice'] = {
+                    required: "Please enter a unit price" // Custom message for required rule
+                    // Add more messages as needed
+                };
+
+                $('input[name^="TradingDocumentDetails["][name$="].UnitPrice"]').each(function (index) {
+                    var fieldName = $(this).attr('name');
+                    // Ensure that the rules object exists for the current input field
+                    if (!validator.settings.rules[fieldName]) {
+                        validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
+                    }
+                    // Add new validation rules
+                    validator.settings.rules[fieldName]['required'] = true;
+                    // Add more validation rules as needed
+
+                    // Optionally, add messages for the new validation rules
+                    validator.settings.messages[fieldName] = {
+                        required: "Please enter a value for Unit Price"// Custom message for required rule
+                        // Add more messages as needed
+                    };
+                });
+
+
+                // Log all validation rules
+                Object.keys(validator.settings.rules).forEach(function (fieldName) {
+                    console.log("Field: " + fieldName);
+                    console.log("Rules: ", validator.settings.rules[fieldName]);
+                });
+
+
+
+                // Manually trigger client-side validation
+                if (validateForm()) {
+                    // If validation passes, proceed with form submission
+                    document.getElementById('#tradingForm').submit(); // Replace 'yourFormId' with the ID of your form
+                }
+            });
         });
+
+        function validateForm() {
+            // Assuming you're using jQuery Validate for client-side validation
+            return $('#tradingForm').valid(); // Replace 'yourFormId' with the ID of your form
+        }
 
 
         // Global variable to keep track of the current index
-        var currentIndex = 0;
 
-        // Check if the URL contains "/Create/0" to add the first row
-        if (window.location.href.includes("/Create/0")) {
-            // Add first row
-            addTradingDocumentDetail();
-        }
+        var currentIndex = @(Model?.TradingDocumentDetails.Count ?? 0);
+
+
+
+        // calculate at Edit View Load
+        calculateGrandTotal();
 
         // JavaScript function to add a new row for TradingDocumentDetails
 
@@ -250,60 +351,67 @@
             var newRow = document.createElement('tr');
 
             newRow.innerHTML = `
-                <td>
-                    <div class="form-group">
-                        <label asp-for="TradingDocumentDetails[${currentIndex}].Description" class="control-label"></label>
-                        <input name="TradingDocumentDetails[${currentIndex}].Description" class="form-control" />
-                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Description" class="text-danger"></span>
-                    </div>
-                </td>
-                <td>
-                    <div class="form-group">
-                        <label asp-for="TradingDocumentDetails[${currentIndex}].ItemId" class="control-label"></label>
-                        <select name="TradingDocumentDetails[${currentIndex}].ItemId" class="form-control">
-                            <option value="">-- Select Item --</option>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <label asp-for="TradingDocumentDetails[${currentIndex}].Description" class="control-label"></label>
+                                                        <input name="TradingDocumentDetails[${currentIndex}].Description" class="form-control" />
+                                                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Description" class="text-danger"></span>
+
+
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <label asp-for="TradingDocumentDetails[${currentIndex}].ItemId" class="control-label"></label>
+                                                        <select name="TradingDocumentDetails[${currentIndex}].ItemId" class="form-control">
+                                                            <option value="">-- Select Item --</option>
         @foreach (var item in (IEnumerable<SelectListItem>)ViewData["Item"])
         {
-                                    <option value="@item.Value">@item.Text</option>
+                                                                                    <option value="@item.Value">@item.Text</option>
         }
-                        </select>
-                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].ItemId" class="text-danger"></span>
-                    </div>
-                </td>
-                <td>
-                    <div class="form-group">
-                        <label asp-for="TradingDocumentDetails[${currentIndex}].UnitPrice" class="control-label"></label>
-                        <input name="TradingDocumentDetails[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
-                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].UnitPrice" class="text-danger"></span>
-                    </div>
-                </td>
-                <td>
-                    <div class="form-group">
-                        <label asp-for="TradingDocumentDetails[${currentIndex}].Quantity" class="control-label"></label>
-                        <input name="TradingDocumentDetails[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
-                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Quantity" class="text-danger"></span>
-                    </div>
-                </td>
-                 <td>
+                                                        </select>
+                                                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].ItemId" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <label asp-for="TradingDocumentDetails[${currentIndex}].UnitPrice" class="control-label"></label>
+                                                        <input name="TradingDocumentDetails[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                                        <span class="text-danger field-validation-valid" data-valmsg-for="TradingDocumentDetails[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
 
-                    <div class="form-group">
-                        <label asp-for="TradingDocumentDetails[${currentIndex}].Amount" class="control-label"></label>
-                        <input name="TradingDocumentDetails[${currentIndex}].Amount" class="form-control" readonly />
-                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Amount" class="text-danger"></span>
-                    </div>
-                </td>
-                <td class="align-middle text-center">
-                    <div class="form-group">
-                        <button type="button" class="btn btn-danger" onclick="removeTradingDocumentDetail(this)">Remove Row</button>
-                    </div>
-                </td>
-            `;
+
+
+
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <label asp-for="TradingDocumentDetails[${currentIndex}].Quantity" class="control-label"></label>
+                                                        <input name="TradingDocumentDetails[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Quantity" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                 <td>
+
+                                                    <div class="form-group">
+                                                        <label asp-for="TradingDocumentDetails[${currentIndex}].Amount" class="control-label"></label>
+                                                        <input name="TradingDocumentDetails[${currentIndex}].Amount" class="form-control" readonly />
+                                                        <span asp-validation-for="TradingDocumentDetails[${currentIndex}].Amount" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <div class="form-group">
+                                                        <button type="button" class="btn btn-danger" onclick="removeTradingDocumentDetail(this)">Remove Row</button>
+                                                    </div>
+                                                </td>
+                                            `;
 
             // Append the new row to the table body
             tableBody.appendChild(newRow);
 
             // Increment the index for the next row
             currentIndex++;
+
         }
 
 
@@ -311,6 +419,8 @@
         function removeTradingDocumentDetail(button) {
             var row = button.parentNode.parentNode.parentNode;
             row.parentNode.removeChild(row);
+
+            calculateGrandTotal();
         }
 
         // Function to calculate Amount based on UnitPrice and Quantity
@@ -319,32 +429,58 @@
             var quantity = parseFloat(document.getElementsByName(`TradingDocumentDetails[${index}].Quantity`)[0].value) || 0;
             var amount = unitPrice * quantity;
             document.getElementsByName(`TradingDocumentDetails[${index}].Amount`)[0].value = amount.toFixed(2);
+            calculateGrandTotal();
         }
 
-        // Initialize the form with existing data
-        //var existingData = @Html.Raw(Json.Serialize(Model?.TradingDocumentDetails));
 
-        // for (const item of existingData.$values) {
-        //     addTradingDocumentDetail(item.description, item.itemId, item.unitPrice, item.quantity, item.amount);
-        // }
 
-        window.addEventListener('DOMContentLoaded', (event) => {
-            var jsVariable = "selectedValue"; // Replace with your JavaScript variable
-            var selectElement = document.getElementById('itemSelect');
-            var options = selectElement.options;
-            for (var i = 0; i < options.length; i++) {
-                if (options[i].value === jsVariable) {
-                    options[i].setAttribute('selected', 'selected');
-                    break;
-                }
+        // Calculate and display the grand total
+        function calculateGrandTotal() {
+            var grandTotal = 0;
+
+            // Iterate through each row in the table
+            var rows = document.querySelectorAll('#tradingLinesTable tbody tr');
+            rows.forEach(function (row) {
+                // Get the amount input element in the current row
+                var amountInput = row.querySelector('input[name^="TradingDocumentDetails["][name$="].Amount"]');
+
+                // Get the value of the amount input (assuming it's a numeric value)
+                var amount = parseFloat(amountInput.value) || 0;
+
+                // Accumulate the amount to the grand total
+                grandTotal += amount;
+            });
+
+            // Display the grand total
+            var grandTotalElement = document.getElementById('grandTotalAmount');
+            if (grandTotalElement) {
+                grandTotalElement.textContent = grandTotal.toFixed(2); // Format the total with two decimal places
             }
-        });
+            var subtotalAmountElement = document.getElementById('subtotalAmount');
+
+            if (subtotalAmountElement) {
+                subtotalAmountElement.textContent = grandTotal.toFixed(2); // Format the total with two decimal places
+            }
+
+        }
+
+
+        // Check if the URL contains "/Create/0" to add the first row
+        if (window.location.href.includes("/Create/0")) {
+            // Add first row
+            addTradingDocumentDetail();
+        }
 
     </script>
 
 
+    @*   <script src="~/Scripts/jquery.js"></script>
+    <script src="~/Scripts/jquery.validation.js"></script>
+    <script src="~/Scripts/jquery.validation.unobtrusive.js"></script> *@
 
-
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
 
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

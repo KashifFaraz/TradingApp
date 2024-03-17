@@ -4,10 +4,10 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Invoice Details</h1>
 
 <div>
-    <h4>TradingDocument</h4>
+    <h4>Invoice Details</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -16,11 +16,17 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Id)
         </dd>
-        <dt class = "col-sm-2">
+        @* <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.CustomId)
-        </dt>
+        </dt> 
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.CustomId)
+        </dd>*@
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Stakeholder)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Stakeholder.Name)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.DocDate)
@@ -28,7 +34,7 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.DocDate)
         </dd>
-        <dt class = "col-sm-2">
+        @* <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.BankName)
         </dt>
         <dd class = "col-sm-10">
@@ -39,7 +45,7 @@
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.AccountTitle)
-        </dd>
+        </dd> *@
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.DueDate)
         </dt>
@@ -64,7 +70,7 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.TotalAmount)
         </dd>
-        <dt class = "col-sm-2">
+       @*  <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.CreatedBy)
         </dt>
         <dd class = "col-sm-10">
@@ -117,13 +123,8 @@
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.SalesOder.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stakeholder)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stakeholder.Id)
-        </dd>
+        </dd> *@
+        
     </dl>
 </div>
 
@@ -140,11 +141,12 @@
                 UnitPrice
             </th>
             <th>
-                Amount
-            </th>
-            <th>
                 Quantity
             </th>
+            <th>
+                Amount
+            </th>
+           
            
           
             
@@ -159,22 +161,44 @@
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Item.Id)
+                    @Html.DisplayFor(modelItem => item.Item.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.UnitPrice)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Amount)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.Quantity)
                 </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+               
                
             </tr>
         }
     </tbody>
 </table>
+
+
+<div class="mt-3">
+    <div class="row">
+        <div class="col text-end">
+            <h4>
+                <label asp-for="SubTotal" class="control-label"></label>
+                @Html.DisplayFor(modelItem => modelItem.SubTotal)
+            </h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-end">
+            <h4>
+                <label asp-for="TotalAmount" class="control-label"></label>
+                @Html.DisplayFor(modelItem => modelItem.TotalAmount)
+            </h4>
+        </div>
+    </div>
+</div>
+
 
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |

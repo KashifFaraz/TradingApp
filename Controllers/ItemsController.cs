@@ -21,7 +21,7 @@ namespace TradingApp.Controllers
         // GET: Items
         public async Task<IActionResult> Index()
         {
-            var tradingAppContext = _context.Items.Include(i => i.IdNavigation);
+            var tradingAppContext = _context.Items.Include(i => i.SaleUnitNavigation);
             return View(await tradingAppContext.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace TradingApp.Controllers
             }
 
             var item = await _context.Items
-                .Include(i => i.IdNavigation)
+                .Include(i => i.SaleUnitNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (item == null)
             {
@@ -130,7 +130,7 @@ namespace TradingApp.Controllers
             }
 
             var item = await _context.Items
-                .Include(i => i.IdNavigation)
+                .Include(i => i.SaleUnitNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (item == null)
             {

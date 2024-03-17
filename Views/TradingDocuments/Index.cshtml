@@ -16,10 +16,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.Id)
             </th>
-            <th>
+           @*  <th>
                 @Html.DisplayNameFor(model => model.CustomId)
-            </th>
-            <th>
+            </th>*@
+             <th>
                 @Html.DisplayNameFor(model => model.DocDate)
             </th>
            @*  <th>
@@ -71,9 +71,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Id)
             </td>
-            <td>
+           @*  <td>
                 @Html.DisplayFor(modelItem => item.CustomId)
-            </td>
+            </td> *@
             <td>
                 @Html.DisplayFor(modelItem => item.DocDate)
             </td>
@@ -112,12 +112,12 @@
                 @Html.DisplayFor(modelItem => item.SalesOder.Id)
             </td> *@
             <td>
-                @Html.DisplayFor(modelItem => item.Stakeholder.Name)
+                    @Html.DisplayFor(modelItem => item.Stakeholder.Name)
             </td>
             <td>
-                <a asp-action="Create" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
-                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
+                    <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>
             </td>
         </tr>
 }

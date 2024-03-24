@@ -116,7 +116,7 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn, TradingDocumentDetails")] TradingDocument tradingDocument)
+        public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,TradingDocumentDetails")] TradingDocument tradingDocument)
         {
             if (!ModelState.IsValid)
             {
@@ -162,8 +162,8 @@ namespace TradingApp.Controllers
                     try
                     {
                         tradingDocument.IsActive = true;
-                        tradingDocument.CreatedBy = 0;
-                        tradingDocument.CraetedOn = DateTime.Now;
+                        tradingDocument.EditedBy = Convert.ToInt32(userId);
+                        tradingDocument.EditedOn = DateTime.Now;
                         _context.Update(tradingDocument);
                         await _context.SaveChangesAsync();
                     }
@@ -196,7 +196,8 @@ namespace TradingApp.Controllers
             if (ModelState.IsValid)
             {
                 tradingDocument.IsActive = true;
-
+                tradingDocument.CreatedBy = Convert.ToInt32(userId);
+                tradingDocument.CraetedOn = DateTime.Now;
                 _context.Add(tradingDocument);
               var a =  await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

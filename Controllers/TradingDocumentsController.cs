@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using TradingApp.Models;
 
 namespace TradingApp.Controllers
@@ -28,8 +30,9 @@ namespace TradingApp.Controllers
                 .Include(t => t.Quote)
                 .Include(t => t.Rfq)
                 .Include(t => t.SalesOder)
-                .Include(t => t.Stakeholder);
-            return View(await tradingAppContext.ToListAsync());
+                .Include(t => t.Stakeholder)
+                .Include(t => t.Organization);
+            return View(await tradingAppContext.Where(x=>x.IsActive==true).ToListAsync());
         }
 
         // GET: TradingDocuments/Details/5
@@ -49,7 +52,8 @@ namespace TradingApp.Controllers
                 .Include(t => t.Rfq)
                 .Include(t => t.SalesOder)
                 .Include(t => t.Stakeholder)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(t => t.Organization)
+                .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
             if (tradingDocument == null)
             {
                 return NotFound();
@@ -75,6 +79,8 @@ namespace TradingApp.Controllers
                 .Include(t => t.Rfq)
                 .Include(t => t.SalesOder)
                 .Include(t => t.Stakeholder)
+                .Include(t => t.Organization)
+
                 .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (tradingDocument == null)
@@ -133,6 +139,16 @@ namespace TradingApp.Controllers
             
             tradingDocument.SubTotal= tradingDocument.TradingDocumentDetails.Sum(x=>x.Amount);
             tradingDocument.TotalAmount = tradingDocument.TradingDocumentDetails.Sum(x => x.Amount);
+            // Get the current user's ID
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Get the current user's name
+            string userName = User.Identity.Name;
+
+            // Alternatively, you can retrieve the user's name from the claims
+            string userNameClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            // Use the userId and userName as needed in your action
 
             if (id is not null && id != 0)
             {
@@ -145,6 +161,9 @@ namespace TradingApp.Controllers
                 {
                     try
                     {
+                        tradingDocument.IsActive = true;
+                        tradingDocument.CreatedBy = 0;
+                        tradingDocument.CraetedOn = DateTime.Now;
                         _context.Update(tradingDocument);
                         await _context.SaveChangesAsync();
                     }
@@ -176,6 +195,8 @@ namespace TradingApp.Controllers
 
             if (ModelState.IsValid)
             {
+                tradingDocument.IsActive = true;
+
                 _context.Add(tradingDocument);
               var a =  await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -201,7 +222,7 @@ namespace TradingApp.Controllers
                 return NotFound();
             }
 
-            var tradingDocument = await _context.TradingDocuments.FindAsync(id);
+            var tradingDocument = await _context.TradingDocuments.Where(x => x.Id== id && x.IsActive == true).FirstOrDefaultAsync();
             if (tradingDocument == null)
             {
                 return NotFound();
@@ -295,10 +316,16 @@ namespace TradingApp.Controllers
             {
                 return Problem("Entity set 'TradingAppContext.TradingDocuments'  is null.");
             }
-            var tradingDocument = await _context.TradingDocuments.FindAsync(id);
+            var tradingDocument = await _context.TradingDocuments.Include(x=>x.TradingDocumentDetails).FirstOrDefaultAsync(m=>m.Id==id);
             if (tradingDocument != null)
             {
-                _context.TradingDocuments.Remove(tradingDocument);
+                tradingDocument.IsActive = false;
+                foreach (var item in tradingDocument.TradingDocumentDetails) {
+                    item.IsActive = false;
+                }
+                _context.Update(tradingDocument);
+                await _context.SaveChangesAsync();
+               // _context.TradingDocuments.Remove(tradingDocument);
             }
             
             await _context.SaveChangesAsync();

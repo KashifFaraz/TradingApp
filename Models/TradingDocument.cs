@@ -47,6 +47,10 @@ public partial class TradingDocument
 
     public DateTime? EditedOn { get; set; }
 
+    public bool? IsActive { get; set; }
+
+    public int? OrganizationId { get; set; }
+
     public virtual ICollection<TradingDocument> InverseInvoice { get; set; } = new List<TradingDocument>();
 
     public virtual ICollection<TradingDocument> InversePurchaseOrder { get; set; } = new List<TradingDocument>();
@@ -58,6 +62,8 @@ public partial class TradingDocument
     public virtual ICollection<TradingDocument> InverseSalesOder { get; set; } = new List<TradingDocument>();
 
     public virtual TradingDocument? Invoice { get; set; }
+
+    public virtual Organization? Organization { get; set; }
 
     public virtual ICollection<PaymentReconciliation> PaymentReconciliations { get; set; } = new List<PaymentReconciliation>();
 

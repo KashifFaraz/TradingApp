@@ -27,6 +27,8 @@ public partial class TradingDocumentDetail
 
     public DateTime? EditedOn { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public virtual Item? Item { get; set; }
 
     public virtual TradingDocument? Master { get; set; }

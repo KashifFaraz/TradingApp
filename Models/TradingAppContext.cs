@@ -31,6 +31,8 @@ public partial class TradingAppContext : DbContext
 
     public virtual DbSet<MeasureUnit> MeasureUnits { get; set; }
 
+    public virtual DbSet<Organization> Organizations { get; set; }
+
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<PaymentReconciliation> PaymentReconciliations { get; set; }
@@ -144,6 +146,21 @@ public partial class TradingAppContext : DbContext
                 .IsFixedLength();
         });
 
+        modelBuilder.Entity<Organization>(entity =>
+        {
+            entity.ToTable("Organization");
+
+            entity.Property(e => e.CraetedOn).HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.FolderName).HasMaxLength(500);
+            entity.Property(e => e.IsActive)
+                .IsRequired()
+                .HasDefaultValueSql("((1))");
+            entity.Property(e => e.LogoUrl).HasMaxLength(500);
+            entity.Property(e => e.Name).HasMaxLength(100);
+        });
+
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.ToTable("Payment");
@@ -212,6 +229,7 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.DocDate).HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("datetime");
             entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
             entity.Property(e => e.Rfqid).HasColumnName("RFQId");
             entity.Property(e => e.SubTotal).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
@@ -220,6 +238,10 @@ public partial class TradingAppContext : DbContext
             entity.HasOne(d => d.Invoice).WithMany(p => p.InverseInvoice)
                 .HasForeignKey(d => d.InvoiceId)
                 .HasConstraintName("FK_TradingDocument_TradingDocument4");
+
+            entity.HasOne(d => d.Organization).WithMany(p => p.TradingDocuments)
+                .HasForeignKey(d => d.OrganizationId)
+                .HasConstraintName("FK_TradingDocument_Organization");
 
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.InversePurchaseOrder)
                 .HasForeignKey(d => d.PurchaseOrderId)
@@ -248,6 +270,7 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.CraetedOn).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Item).WithMany(p => p.TradingDocumentDetails)

@@ -1,0 +1,16 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm email";
+}
+
+<h1>@ViewData["Title"]</h1>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+
+
+<div class="form-group">
+    <a class="btn btn-primary" asp-controller="Organizations" asp-action="Create" asp-route-IsOnboarding="true">Create Organization </a>
+
+   
+</div>

@@ -149,11 +149,11 @@ public partial class TradingAppContext : DbContext
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.InvoiceCreatedByNavigations)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK_TradingDocument_AppUsers");
+                .HasConstraintName("FK_Invoice_AppUsers");
 
             entity.HasOne(d => d.EditedByNavigation).WithMany(p => p.InvoiceEditedByNavigations)
                 .HasForeignKey(d => d.EditedBy)
-                .HasConstraintName("FK_TradingDocument_AppUsers1");
+                .HasConstraintName("FK_Invoice_AppUsers1");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.OrganizationId)
@@ -307,7 +307,6 @@ public partial class TradingAppContext : DbContext
 
             entity.HasIndex(e => e.CustomId, "Unique_Transaction").IsUnique();
 
-            entity.Property(e => e.TransactionId).ValueGeneratedNever();
             entity.Property(e => e.CustomId)
                 .HasMaxLength(50)
                 .IsUnicode(false);

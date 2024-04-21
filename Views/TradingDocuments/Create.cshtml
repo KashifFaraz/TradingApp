@@ -28,11 +28,11 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
 
-                @*  <div class="form-group">
+                 <div class="form-group">
                 <label asp-for="CustomId" class="control-label"></label>
-                <input asp-for="CustomId" class="form-control" />
-                <span asp-validation-for="CustomId" class="text-danger"></span>
-                </div> *@
+                    <input asp-for="CustomId" class="form-control" />
+                    <span asp-validation-for="CustomId" class="text-danger"></span>
+                </div>
 
                 <div class="form-group">
                     <label asp-for="DocDate" class="control-label"></label>
@@ -136,8 +136,8 @@
                                 <tr>
                                     <td>
                                         <div class="form-group">
-                                            @* <label asp-for="@Model.TransectionLines.ElementAt(i).ItemId" class="control-label"></label> *@
-                                            <select name="TransectionLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this, @i)">
+                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).ItemId" class="control-label"></label> *@
+                                            <select name="InvoiceLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this, @i)">
                                                 <option value="">-- Select Item --</option>
                                                 @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
                                                 {
@@ -153,16 +153,16 @@
                                                     }
                                                 }
                                             </select>
-                                            <span class="text-danger field-validation-valid" data-valmsg-for="TransectionLines[@i].ItemId" data-valmsg-replace="true"></span>
+                                            <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].ItemId" data-valmsg-replace="true"></span>
 
                                         </div>
                                     </td>
                                     <td>
-                                        <input type="hidden" name="TransectionLines[@i].Id" value="@Model.InvoiceLines.ElementAt(i).Id" />
+                                        <input type="hidden" name="InvoiceLines[@i].Id" value="@Model.InvoiceLines.ElementAt(i).Id" />
 
                                         <div class="form-group">
-                                            @* <label asp-for="@Model.TransectionLines.ElementAt(i).Description" class="control-label"></label> *@
-                                            <input name="TransectionLines[@i].Description" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Description" />
+                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Description" class="control-label"></label> *@
+                                            <input name="InvoiceLines[@i].Description" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Description" />
 
                                             <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Description" class="text-danger"></span>
                                         </div>
@@ -170,22 +170,22 @@
 
                                     <td>
                                         <div class="form-group">
-                                            <input name="TransectionLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(@i)" />
-                                            <span class="text-danger field-validation-valid" data-valmsg-for="TransectionLines[@i].UnitPrice" data-valmsg-replace="true"></span>
+                                            <input name="InvoiceLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(@i)" />
+                                            <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].UnitPrice" data-valmsg-replace="true"></span>
 
                                         </div>
                                     </td>
                                     <td>
                                         <div class="form-group">
-                                            @* <label asp-for="@Model.TransectionLines.ElementAt(i).Quantity" class="control-label"></label> *@
-                                            <input name="TransectionLines[@i].Quantity" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Quantity" oninput="calculateAmount(@i)" />
+                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="control-label"></label> *@
+                                            <input name="InvoiceLines[@i].Quantity" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Quantity" oninput="calculateAmount(@i)" />
                                             <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="text-danger"></span>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="form-group">
-                                            @* <label asp-for="@Model.TransectionLines.ElementAt(i).Amount" class="control-label"></label> *@
-                                            <input name="TransectionLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
+                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Amount" class="control-label"></label> *@
+                                            <input name="InvoiceLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
                                             <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Amount" class="text-danger"></span>
                                         </div>
                                     </td>
@@ -203,7 +203,7 @@
             </div>
             <div class="mb-3">
                 <div class="row">
-                    <div id="TransectionLinesContainer">
+                    <div id="InvoiceLinesContainer">
                         <!-- Placeholder for dynamically added rows -->
                     </div>
                     <div class="col text-start">
@@ -254,7 +254,7 @@
             var selectedItem = selectElement.options[selectElement.selectedIndex];
             var unitPrice = selectedItem.dataset.price;
 
-            var unitPriceInputElement = document.querySelector('input[name="TransectionLines[' + index + '].UnitPrice"]');
+            var unitPriceInputElement = document.querySelector('input[name="InvoiceLines[' + index + '].UnitPrice"]');
             if (unitPriceInputElement) {
                 unitPriceInputElement.value = unitPrice;
             }
@@ -281,7 +281,7 @@
                 // Access the validator object
                 var validator = $('#tradingForm').validate();
 
-                $('select[name^="TransectionLines["][name$="].ItemId"]').each(function (index) {
+                $('select[name^="InvoiceLines["][name$="].ItemId"]').each(function (index) {
                     var fieldName = $(this).attr('name');
                     // Ensure that the rules object exists for the current input field
                     if (!validator.settings.rules[fieldName]) {
@@ -298,7 +298,7 @@
                     };
                 });
 
-                $('input[name^="TransectionLines["][name$="].UnitPrice"]').each(function (index) {
+                $('input[name^="InvoiceLines["][name$="].UnitPrice"]').each(function (index) {
                     var fieldName = $(this).attr('name');
                     // Ensure that the rules object exists for the current input field
                     if (!validator.settings.rules[fieldName]) {
@@ -347,7 +347,7 @@
         // calculate at Edit View Load
         calculateGrandTotal();
 
-        // JavaScript function to add a new row for TransectionLines
+        // JavaScript function to add a new row for InvoiceLines
 
         function addTradingDocumentDetail() {
             var tableBody = document.querySelector('#tradingLinesTable tbody');
@@ -357,31 +357,20 @@
 
             newRow.innerHTML = `<td>
               <div class="form-group">
-                  <select name="TransectionLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this, ${currentIndex})">
+                  <select name="InvoiceLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this, ${currentIndex})">
                       <option value="">-- Select Item --</option>
         @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
         {
                               <option data-price="@item.Price" value="@item.Id">@item.Name</option>
         }
                   </select>
-                  <span class="text-danger field-validation-valid" data-valmsg-for="TransectionLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
+                  <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
               </div>
           </td>
           <td>
               <div class="form-group">
-                  <input name="TransectionLines[${currentIndex}].Description" class="form-control" />
-                  <span asp-validation-for="TransectionLines[${currentIndex}].Description" class="text-danger"></span>
-
-
-              </div>
-          </td>
-          <td>
-              <div class="form-group">
-
-                  <input name="TransectionLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
-                  <span class="text-danger field-validation-valid" data-valmsg-for="TransectionLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
-
-
+                  <input name="InvoiceLines[${currentIndex}].Description" class="form-control" />
+                  <span asp-validation-for="InvoiceLines[${currentIndex}].Description" class="text-danger"></span>
 
 
               </div>
@@ -389,16 +378,27 @@
           <td>
               <div class="form-group">
 
-                  <input name="TransectionLines[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
-                  <span asp-validation-for="TransectionLines[${currentIndex}].Quantity" class="text-danger"></span>
+                  <input name="InvoiceLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                  <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
+
+
+
+
+              </div>
+          </td>
+          <td>
+              <div class="form-group">
+
+                  <input name="InvoiceLines[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                  <span asp-validation-for="InvoiceLines[${currentIndex}].Quantity" class="text-danger"></span>
               </div>
           </td>
           <td>
 
               <div class="form-group">
 
-                  <input name="TransectionLines[${currentIndex}].Amount" class="form-control" readonly />
-                  <span asp-validation-for="TransectionLines[${currentIndex}].Amount" class="text-danger"></span>
+                  <input name="InvoiceLines[${currentIndex}].Amount" class="form-control" readonly />
+                  <span asp-validation-for="InvoiceLines[${currentIndex}].Amount" class="text-danger"></span>
               </div>
           </td>
           <td>
@@ -416,7 +416,7 @@
 
         }
 
-        // JavaScript function to remove a row for TransectionLines
+        // JavaScript function to remove a row for InvoiceLines
         function removeTradingDocumentDetail(button) {
             var row = button.parentNode.parentNode.parentNode;
             row.parentNode.removeChild(row);
@@ -426,10 +426,10 @@
 
         // Function to calculate Amount based on UnitPrice and Quantity
         function calculateAmount(index) {
-            var unitPrice = parseFloat(document.getElementsByName(`TransectionLines[${index}].UnitPrice`)[0].value) || 0;
-            var quantity = parseFloat(document.getElementsByName(`TransectionLines[${index}].Quantity`)[0].value) || 0;
+            var unitPrice = parseFloat(document.getElementsByName(`InvoiceLines[${index}].UnitPrice`)[0].value) || 0;
+            var quantity = parseFloat(document.getElementsByName(`InvoiceLines[${index}].Quantity`)[0].value) || 0;
             var amount = unitPrice * quantity;
-            document.getElementsByName(`TransectionLines[${index}].Amount`)[0].value = amount.toFixed(2);
+            document.getElementsByName(`InvoiceLines[${index}].Amount`)[0].value = amount.toFixed(2);
             calculateGrandTotal();
         }
 
@@ -443,7 +443,7 @@
             var rows = document.querySelectorAll('#tradingLinesTable tbody tr');
             rows.forEach(function (row) {
                 // Get the amount input element in the current row
-                var amountInput = row.querySelector('input[name^="TransectionLines["][name$="].Amount"]');
+                var amountInput = row.querySelector('input[name^="InvoiceLines["][name$="].Amount"]');
 
                 // Get the value of the amount input (assuming it's a numeric value)
                 var amount = parseFloat(amountInput.value) || 0;

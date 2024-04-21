@@ -8,14 +8,16 @@ using TradingApp.Utility;
 namespace TradingApp.Models
 {
     [ModelMetadataType(typeof(TransectionMetadata))]
-    public partial class Invoice
+    public partial class Invoice 
     {
         //public Constants.PaymentType PaymentType { get; set; }
+        [NotMapped]
+        public string? CustomId { get; set; }
 
     }
-   
 
-        public class TransectionMetadata
+
+    public class TransectionMetadata
     {
         public int Id { get; set; }
         [Display(Name = "Custom Id")]

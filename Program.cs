@@ -67,6 +67,11 @@ app.MapControllerRoute(
     pattern: "Invoice/{action=Index}/{id?}",
     defaults: new { controller = "TradingDocuments" });
 
+app.MapControllerRoute(
+    name: "Customer",
+    pattern: "Customer/{action=Index}/{id?}",
+    defaults: new { controller = "Stakeholders" });
+
 app.MapRazorPages();
 
 

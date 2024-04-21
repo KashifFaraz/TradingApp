@@ -7,7 +7,7 @@ public partial class AppRoleClaim
 {
     public int Id { get; set; }
 
-    public string RoleId { get; set; } = null!;
+    public int RoleId { get; set; }
 
     public string? ClaimType { get; set; }
 

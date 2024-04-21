@@ -11,6 +11,10 @@ public partial class Item
 
     public string? Description { get; set; }
 
+    public decimal? Price { get; set; }
+
+    public int? SaleUnit { get; set; }
+
     public int? CreatedBy { get; set; }
 
     public DateTime? CraetedOn { get; set; }
@@ -19,9 +23,7 @@ public partial class Item
 
     public DateTime? EditedOn { get; set; }
 
-    public int? SaleUnit { get; set; }
+    public virtual ICollection<InvoiceLine> InvoiceLines { get; set; } = new List<InvoiceLine>();
 
     public virtual MeasureUnit? SaleUnitNavigation { get; set; }
-
-    public virtual ICollection<TradingDocumentDetail> TradingDocumentDetails { get; set; } = new List<TradingDocumentDetail>();
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using TradingApp.Models;
 
 namespace TradingApp.Controllers
 {
+    [Authorize]
     public class ItemsController : Controller
     {
         private readonly TradingAppContext _context;
@@ -45,8 +47,10 @@ namespace TradingApp.Controllers
         }
 
         // GET: Items/Create
-        public IActionResult Create()
+        public IActionResult Create(bool IsOnboarding)
         {
+            ViewBag.IsOnboarding = IsOnboarding;
+
             ViewData["Id"] = new SelectList(_context.MeasureUnits, "Id", "Name");
             return View();  
         }
@@ -56,14 +60,25 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,CreatedBy,CraetedOn,EditedBy,EditedOn,SaleUnit")] Item item)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,SaleUnit")] Item item, bool IsOnboarding)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(item);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (IsOnboarding)
+                {
+                    // If it's part of onboarding flow, redirect to create Invoices action
+                    return RedirectToAction("Create", "Invoice", new {id =0});
+                }
+                else
+                {
+                    // If it's not part of onboarding flow, redirect to index action
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            ViewBag.IsOnboarding = IsOnboarding;
+
             ViewData["Id"] = new SelectList(_context.MeasureUnits, "Id", "Name", item.Id);
             return View(item);
         }

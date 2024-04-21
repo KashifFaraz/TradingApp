@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using TradingApp.Models;
 
 namespace TradingApp.Controllers
 {
+    [Authorize]
     public class StakeholdersController : Controller
     {
         private readonly TradingAppContext _context;
@@ -45,8 +47,9 @@ namespace TradingApp.Controllers
         }
 
         // GET: Stakeholders/Create
-        public IActionResult Create()
+        public IActionResult Create(bool IsOnboarding)
         {
+            ViewBag.IsOnboarding = IsOnboarding;
             ViewData["Id"] = new SelectList(_context.StakeholderTypes, "Id", "Name");
             return View();
         }
@@ -56,14 +59,26 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Type,CreatedBy,CraetedOn,EditedBy,EditedOn")] Stakeholder stakeholder)
+        public async Task<IActionResult> Create([Bind("Id,Name,Type,CreatedBy,CraetedOn,EditedBy,EditedOn")] Stakeholder stakeholder, bool IsOnboarding)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(stakeholder);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (IsOnboarding)
+                {
+                    // If it's part of onboarding flow, redirect to create Invoices action
+                    return RedirectToAction("Create", "Items", new { IsOnboarding = true });
+                }
+                else
+                {
+                    // If it's not part of onboarding flow, redirect to index action
+                    return RedirectToAction(nameof(Index));
+                }
             }
+           
+            ViewBag.IsOnboarding = IsOnboarding;
+
             ViewData["Id"] = new SelectList(_context.StakeholderTypes, "Id", "Name",stakeholder.Type);
 
             return View(stakeholder);

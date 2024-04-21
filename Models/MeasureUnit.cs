@@ -9,5 +9,7 @@ public partial class MeasureUnit
 
     public string? Name { get; set; }
 
+    public string? Symbol { get; set; }
+
     public virtual ICollection<Item> Items { get; set; } = new List<Item>();
 }

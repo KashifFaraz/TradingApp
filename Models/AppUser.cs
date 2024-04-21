@@ -5,7 +5,7 @@ namespace TradingApp.Models;
 
 public partial class AppUser
 {
-    public string Id { get; set; } = null!;
+    public int Id { get; set; }
 
     public string? UserName { get; set; }
 
@@ -35,11 +35,17 @@ public partial class AppUser
 
     public int AccessFailedCount { get; set; }
 
+    public int? DefaultOrganization { get; set; }
+
     public virtual ICollection<AppUserClaim> AppUserClaims { get; set; } = new List<AppUserClaim>();
 
     public virtual ICollection<AppUserLogin> AppUserLogins { get; set; } = new List<AppUserLogin>();
 
     public virtual ICollection<AppUserToken> AppUserTokens { get; set; } = new List<AppUserToken>();
+
+    public virtual ICollection<Invoice> InvoiceCreatedByNavigations { get; set; } = new List<Invoice>();
+
+    public virtual ICollection<Invoice> InvoiceEditedByNavigations { get; set; } = new List<Invoice>();
 
     public virtual ICollection<AppRole> Roles { get; set; } = new List<AppRole>();
 }

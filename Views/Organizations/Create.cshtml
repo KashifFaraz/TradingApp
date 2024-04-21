@@ -1,4 +1,5 @@
-﻿@model TradingApp.Models.Organization
+﻿@using TradingApp.Utility;
+@model TradingApp.Models.Organization
 
 @{
     ViewData["Title"] = "Create";
@@ -23,12 +24,27 @@
 </table>
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" enctype="multipart/form-data">
+        <form id="organizationForm" asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" name="IsOnboarding" value="@ViewBag.IsOnboarding.ToString().ToLower()" />
+
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
+                @* <span class="text-danger field-validation-valid" data-valmsg-for="Name" data-valmsg-replace="true"></span> *@
+
+            </div>
+            <div class="form-group">
+                <label asp-for="DefaultCurrency" class="control-label"></label>
+                <select asp-for="DefaultCurrency" class="form-control">
+                    <option value="">-- Select Currency --</option>
+                    @foreach (var currency in Constants.Currencies)
+                    {
+                        <option value="@currency.Key">@currency.Value</option>
+                    }
+                </select>
+                <span asp-validation-for="DefaultCurrency" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
@@ -36,37 +52,18 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-@*                 <img src="@Model.LogoUrl" alt="Uploaded Image">
- *@
+                @*                 <img src="@Model.LogoUrl" alt="Uploaded Image">
+                *@
                 <label for="ImageFile" class="control-label">Image File</label>
-                <input id="imageFile" type="file" name="imageFile" class="form-control-file" />
-                <span class="text-danger field-validation-valid" data-valmsg-for="ImageFile" data-valmsg-replace="true"></span>
-
+                <input id="ImageFile" type="file" name="ImageFile" class="form-control-file" required />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                @* <span class="text-danger field-validation-valid" data-valmsg-for="ImageFile" data-valmsg-replace="true"></span> *@
             </div>
 
             <div class="preview-container">
                 <img id="imagePreview" src="#" alt="Image Preview" style="max-width: 100px; display: none;">
             </div>
-           @*  <div class="form-group">
-                <label asp-for="CreatedBy" class="control-label"></label>
-                <input asp-for="CreatedBy" class="form-control" />
-                <span asp-validation-for="CreatedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CraetedOn" class="control-label"></label>
-                <input asp-for="CraetedOn" class="form-control" />
-                <span asp-validation-for="CraetedOn" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EditedBy" class="control-label"></label>
-                <input asp-for="EditedBy" class="form-control" />
-                <span asp-validation-for="EditedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EditedOn" class="control-label"></label>
-                <input asp-for="EditedOn" class="form-control" />
-                <span asp-validation-for="EditedOn" class="text-danger"></span>
-            </div> *@
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -74,12 +71,14 @@
     </div>
 </div>
 
-<div>
+@* <div>
     <a asp-action="Index">Back to List</a>
-</div>
+</div> *@
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
 <script>
 
@@ -103,6 +102,20 @@
             // Read the selected file as a data URL
             reader.readAsDataURL(selectedFile);
         }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // var validator = $('#organizationForm').validate();
+
+        // validator.settings.rules['imageFile']['required'] = true;
+        // validator.settings.messages['imageFile'] = {
+        //     required: "Please select a logo"
+        // };
+
+        // validator.settings.rules['Name']['required'] = true;
+        // validator.settings.messages['Name'] = {
+        //     required: "Please enter a name"
+        // };
+
     });
 
 

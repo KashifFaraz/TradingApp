@@ -21,19 +21,19 @@ namespace TradingApp.Controllers
         // GET: TradingDocumentDetails
         public async Task<IActionResult> Index()
         {
-            var tradingAppContext = _context.TradingDocumentDetails.Include(t => t.Item).Include(t => t.Master);
+            var tradingAppContext = _context.InvoiceLines.Include(t => t.Item).Include(t => t.Master);
             return View(await tradingAppContext.ToListAsync());
         }
 
         // GET: TradingDocumentDetails/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.TradingDocumentDetails == null)
+            if (id == null || _context.InvoiceLines == null)
             {
                 return NotFound();
             }
 
-            var tradingDocumentDetail = await _context.TradingDocumentDetails
+            var tradingDocumentDetail = await _context.InvoiceLines
                 .Include(t => t.Item)
                 .Include(t => t.Master)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -49,7 +49,7 @@ namespace TradingApp.Controllers
         public IActionResult Create()
         {
             ViewData["ItemId"] = new SelectList(_context.Items, "Id", "Name");
-            ViewData["MasterId"] = new SelectList(_context.TradingDocuments, "Id", "Name");
+            ViewData["MasterId"] = new SelectList(_context.Invoices, "Id", "Name");
             return View();
         }
 
@@ -58,7 +58,7 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,MasterId,Description,ItemId,UnitPrice,Amount,Quantity,CreatedBy,CraetedOn,EditedBy,EditedOn")] TradingDocumentDetail tradingDocumentDetail)
+        public async Task<IActionResult> Create([Bind("Id,MasterId,Description,ItemId,UnitPrice,Amount,Quantity,CreatedBy,CraetedOn,EditedBy,EditedOn")] InvoiceLine tradingDocumentDetail)
         {
             if (ModelState.IsValid)
             {
@@ -67,25 +67,25 @@ namespace TradingApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ItemId"] = new SelectList(_context.Items, "Id", "Id", tradingDocumentDetail.ItemId);
-            ViewData["MasterId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocumentDetail.MasterId);
+            ViewData["MasterId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocumentDetail.MasterId);
             return View(tradingDocumentDetail);
         }
 
         // GET: TradingDocumentDetails/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.TradingDocumentDetails == null)
+            if (id == null || _context.InvoiceLines == null)
             {
                 return NotFound();
             }
 
-            var tradingDocumentDetail = await _context.TradingDocumentDetails.FindAsync(id);
+            var tradingDocumentDetail = await _context.InvoiceLines.FindAsync(id);
             if (tradingDocumentDetail == null)
             {
                 return NotFound();
             }
             ViewData["ItemId"] = new SelectList(_context.Items, "Id", "Id", tradingDocumentDetail.ItemId);
-            ViewData["MasterId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocumentDetail.MasterId);
+            ViewData["MasterId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocumentDetail.MasterId);
             return View(tradingDocumentDetail);
         }
 
@@ -94,7 +94,7 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,MasterId,Description,ItemId,UnitPrice,Amount,Quantity,CreatedBy,CraetedOn,EditedBy,EditedOn")] TradingDocumentDetail tradingDocumentDetail)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,MasterId,Description,ItemId,UnitPrice,Amount,Quantity,CreatedBy,CraetedOn,EditedBy,EditedOn")] InvoiceLine tradingDocumentDetail)
         {
             if (id != tradingDocumentDetail.Id)
             {
@@ -122,19 +122,19 @@ namespace TradingApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ItemId"] = new SelectList(_context.Items, "Id", "Id", tradingDocumentDetail.ItemId);
-            ViewData["MasterId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocumentDetail.MasterId);
+            ViewData["MasterId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocumentDetail.MasterId);
             return View(tradingDocumentDetail);
         }
 
         // GET: TradingDocumentDetails/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.TradingDocumentDetails == null)
+            if (id == null || _context.InvoiceLines == null)
             {
                 return NotFound();
             }
 
-            var tradingDocumentDetail = await _context.TradingDocumentDetails
+            var tradingDocumentDetail = await _context.InvoiceLines
                 .Include(t => t.Item)
                 .Include(t => t.Master)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -151,14 +151,14 @@ namespace TradingApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.TradingDocumentDetails == null)
+            if (_context.InvoiceLines == null)
             {
                 return Problem("Entity set 'TradingAppContext.TradingDocumentDetails'  is null.");
             }
-            var tradingDocumentDetail = await _context.TradingDocumentDetails.FindAsync(id);
+            var tradingDocumentDetail = await _context.InvoiceLines.FindAsync(id);
             if (tradingDocumentDetail != null)
             {
-                _context.TradingDocumentDetails.Remove(tradingDocumentDetail);
+                _context.InvoiceLines.Remove(tradingDocumentDetail);
             }
             
             await _context.SaveChangesAsync();
@@ -167,7 +167,7 @@ namespace TradingApp.Controllers
 
         private bool TradingDocumentDetailExists(int id)
         {
-          return (_context.TradingDocumentDetails?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.InvoiceLines?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

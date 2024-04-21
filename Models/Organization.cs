@@ -25,5 +25,7 @@ public partial class Organization
 
     public string? FolderName { get; set; }
 
-    public virtual ICollection<TradingDocument> TradingDocuments { get; set; } = new List<TradingDocument>();
+    public string? DefaultCurrency { get; set; }
+
+    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
 }

@@ -19,5 +19,5 @@ public partial class Stakeholder
 
     public DateTime? EditedOn { get; set; }
 
-    public virtual ICollection<TradingDocument> TradingDocuments { get; set; } = new List<TradingDocument>();
+    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
 }

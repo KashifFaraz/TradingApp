@@ -3,57 +3,52 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using TradingApp.Models;
+using static TradingApp.Utility.Constants;
 
 namespace TradingApp.Controllers
 {
+    [Authorize]
     public class TradingDocumentsController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+
         private readonly TradingAppContext _context;
 
-        public TradingDocumentsController(TradingAppContext context)
+        public TradingDocumentsController(TradingAppContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
+
         }
 
 
         // GET: TradingDocuments
         public async Task<IActionResult> Index()
         {
-            var tradingAppContext = _context.TradingDocuments
-                .Include(t => t.Invoice)
-                .Include(t => t.PurchaseOrder)
-                .Include(t => t.Quote)
-                .Include(t => t.Rfq)
-                .Include(t => t.SalesOder)
-                .Include(t => t.Stakeholder)
-                .Include(t => t.Organization);
-            return View(await tradingAppContext.Where(x=>x.IsActive==true).ToListAsync());
+            var tradingDocument =  await GetTradingDocumentWithDetails().ToListAsync();
+
+            
+            return View(tradingDocument);
         }
 
         // GET: TradingDocuments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.TradingDocuments == null)
+            if (id == null || _context.Invoices == null)
             {
                 return NotFound();
             }
 
-            var tradingDocument = await _context.TradingDocuments
-                .Include(t => t.TradingDocumentDetails)
-                .ThenInclude(t=>t.Item)
-                .Include(t => t.Invoice)
-                .Include(t => t.PurchaseOrder)
-                .Include(t => t.Quote)
-                .Include(t => t.Rfq)
-                .Include(t => t.SalesOder)
-                .Include(t => t.Stakeholder)
-                .Include(t => t.Organization)
-                .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
+            var tradingDocument = await GetTradingDocumentWithDetailsAsync(id.Value);
+
+
             if (tradingDocument == null)
             {
                 return NotFound();
@@ -67,46 +62,45 @@ namespace TradingApp.Controllers
         {
             if (id is not null && id != 0)
             {
-                if (_context.TradingDocuments == null)
+                if (_context.Invoices == null)
                 {
                     return NotFound();
                 }
-                var tradingDocument = await _context.TradingDocuments
-                .Include(t => t.TradingDocumentDetails)
-                .Include(t => t.Invoice)
+                var tradingDocument = await _context.Invoices
+                .Include(t => t.InvoiceLines)
                 .Include(t => t.PurchaseOrder)
                 .Include(t => t.Quote)
                 .Include(t => t.Rfq)
                 .Include(t => t.SalesOder)
                 .Include(t => t.Stakeholder)
                 .Include(t => t.Organization)
-
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Where(x => x.Id == id && x.IsActive == true).FirstOrDefaultAsync();
 
                 if (tradingDocument == null)
                 {
                     return NotFound();
                 }
-                ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
-                ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
-                ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
-                ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
-                ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
+                ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.PurchaseOrderId);
+                ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.QuoteId);
+                ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.Rfqid);
+                ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.SalesOderId);
                 ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
                 ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
-                ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+                //ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+                ViewData["Item"] = _context.Items.ToList();
 
                 return View(tradingDocument);
 
             }
-            ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
-            ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
-            ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
-            ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id");
-            ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id");
+            ViewData["InvoiceId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id");
             ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id");
             ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name");
-            ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+            //ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+            ViewData["Item"] = _context.Items.ToList();
 
             return View();
         }
@@ -116,60 +110,81 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,TradingDocumentDetails")] TradingDocument tradingDocument)
+        public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,InvoiceLines")] Invoice invoice)
         {
+            invoice.Transaction.Type= (byte)TransectionType.Invoice;
+            invoice.TransactionId = invoice.Transaction.TransactionId;
+
             if (!ModelState.IsValid)
             {
-                ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
-                ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
-                ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
-                ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
-                ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
-                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
-                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
-                ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+                ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
+                ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
+                ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
+                ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
+                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
+                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
+                ViewData["Item"] = _context.Items.ToList();
 
-                return View(tradingDocument);
+
+                return View(invoice);
             }
 
-            foreach (var item in tradingDocument.TradingDocumentDetails)
+            foreach (var item in invoice.InvoiceLines)
             {
-                item.Amount = item.UnitPrice* item.Quantity;
+                item.Amount = item.UnitPrice * item.Quantity;
             }
-            
-            tradingDocument.SubTotal= tradingDocument.TradingDocumentDetails.Sum(x=>x.Amount);
-            tradingDocument.TotalAmount = tradingDocument.TradingDocumentDetails.Sum(x => x.Amount);
-            // Get the current user's ID
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Get the current user's name
-            string userName = User.Identity.Name;
+            // Retrieve the user from the UserManager
+            var user = await _userManager.FindByIdAsync(userId);
 
-            // Alternatively, you can retrieve the user's name from the claims
-            string userNameClaim = User.FindFirstValue(ClaimTypes.Name);
+            invoice.OrganizationId = user.DefaultOrganization;
+            invoice.SubTotal = invoice.InvoiceLines.Sum(x => x.Amount);
+            invoice.TotalAmount = invoice.InvoiceLines.Sum(x => x.Amount);
+
 
             // Use the userId and userName as needed in your action
 
             if (id is not null && id != 0)
             {
-                if (id != tradingDocument.Id)
+                if (id != invoice.Id)
                 {
                     return NotFound();
                 }
 
                 if (ModelState.IsValid)
                 {
+
+                    var oldTradingDocument = await _context.Invoices.AsNoTracking()
+               .Include(t => t.InvoiceLines)
+               .ThenInclude(t => t.Item)
+               .Include(t => t.PurchaseOrder)
+               .Include(t => t.Quote)
+               .Include(t => t.Rfq)
+               .Include(t => t.SalesOder)
+               .Include(t => t.Stakeholder)
+               .Include(t => t.Organization)
+               .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
+
+                    if (oldTradingDocument == null)
+                    {
+                        return NotFound();
+                    }
+
+
                     try
                     {
-                        tradingDocument.IsActive = true;
-                        tradingDocument.EditedBy = Convert.ToInt32(userId);
-                        tradingDocument.EditedOn = DateTime.Now;
-                        _context.Update(tradingDocument);
+                        invoice.CreatedBy = oldTradingDocument.CreatedBy;
+                        invoice.CreatedOn = oldTradingDocument.CreatedOn;
+                        invoice.IsActive = true;
+                        invoice.EditedBy = Convert.ToInt32(userId);
+                        invoice.EditedOn = DateTime.Now;
+                        _context.Update(invoice);
                         await _context.SaveChangesAsync();
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        if (!TradingDocumentExists(tradingDocument.Id))
+                        if (!TradingDocumentExists(invoice.Id))
                         {
                             return NotFound();
                         }
@@ -180,59 +195,56 @@ namespace TradingApp.Controllers
                     }
                     return RedirectToAction(nameof(Index));
                 }
-                ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
-                ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
-                ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
-                ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
-                ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
-                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
-                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
+                ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
+                ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
+                ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
+                ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
+                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
+                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
                 ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
 
-                return View(tradingDocument);
+                return View(invoice);
 
             }
 
             if (ModelState.IsValid)
             {
-                tradingDocument.IsActive = true;
-                tradingDocument.CreatedBy = Convert.ToInt32(userId);
-                tradingDocument.CraetedOn = DateTime.Now;
-                _context.Add(tradingDocument);
-              var a =  await _context.SaveChangesAsync();
+                invoice.IsActive = true;
+                invoice.CreatedBy = Convert.ToInt32(userId);
+                invoice.CreatedOn = DateTime.Now;
+                _context.Add(invoice);
+                var a = await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-          
-            ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
-            ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
-            ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
-            ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
-            ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
-            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
-            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
+
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
+            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
+            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
             ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
 
-            return View(tradingDocument);
+            return View(invoice);
         }
 
         // GET: TradingDocuments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.TradingDocuments == null)
+            if (id == null || _context.Invoices == null)
             {
                 return NotFound();
             }
 
-            var tradingDocument = await _context.TradingDocuments.Where(x => x.Id== id && x.IsActive == true).FirstOrDefaultAsync();
+            var tradingDocument = await _context.Invoices.Where(x => x.Id == id && x.IsActive == true).FirstOrDefaultAsync();
             if (tradingDocument == null)
             {
                 return NotFound();
             }
-            ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
-            ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
-            ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
-            ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
-            ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.PurchaseOrderId);
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.QuoteId);
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.Rfqid);
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.SalesOderId);
             ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
             ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
             ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
@@ -245,7 +257,7 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn")] TradingDocument tradingDocument)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,SubTotal,TotalAmount,CreatedBy,CraetedOn,EditedBy,EditedOn")] Invoice tradingDocument)
         {
             if (id != tradingDocument.Id)
             {
@@ -272,11 +284,10 @@ namespace TradingApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["InvoiceId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.InvoiceId);
-            ViewData["PurchaseOrderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.PurchaseOrderId);
-            ViewData["QuoteId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.QuoteId);
-            ViewData["Rfqid"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.Rfqid);
-            ViewData["SalesOderId"] = new SelectList(_context.TradingDocuments, "Id", "Id", tradingDocument.SalesOderId);
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.PurchaseOrderId);
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.QuoteId);
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.Rfqid);
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.SalesOderId);
             ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
             ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
             ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
@@ -287,19 +298,12 @@ namespace TradingApp.Controllers
         // GET: TradingDocuments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.TradingDocuments == null)
+            if (id == null || _context.Invoices == null)
             {
                 return NotFound();
             }
 
-            var tradingDocument = await _context.TradingDocuments
-                .Include(t => t.Invoice)
-                .Include(t => t.PurchaseOrder)
-                .Include(t => t.Quote)
-                .Include(t => t.Rfq)
-                .Include(t => t.SalesOder)
-                .Include(t => t.Stakeholder)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var tradingDocument = await GetTradingDocumentWithDetailsAsync(id.Value);
             if (tradingDocument == null)
             {
                 return NotFound();
@@ -313,29 +317,80 @@ namespace TradingApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.TradingDocuments == null)
+            if (_context.Invoices == null)
             {
                 return Problem("Entity set 'TradingAppContext.TradingDocuments'  is null.");
             }
-            var tradingDocument = await _context.TradingDocuments.Include(x=>x.TradingDocumentDetails).FirstOrDefaultAsync(m=>m.Id==id);
+            var tradingDocument = await _context.Invoices.Include(x => x.InvoiceLines).FirstOrDefaultAsync(m => m.Id == id);
             if (tradingDocument != null)
             {
                 tradingDocument.IsActive = false;
-                foreach (var item in tradingDocument.TradingDocumentDetails) {
+                foreach (var item in tradingDocument.InvoiceLines) {
                     item.IsActive = false;
                 }
                 _context.Update(tradingDocument);
                 await _context.SaveChangesAsync();
-               // _context.TradingDocuments.Remove(tradingDocument);
+                // _context.TradingDocuments.Remove(tradingDocument);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool TradingDocumentExists(int id)
         {
-          return (_context.TradingDocuments?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Invoices?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+        private  IQueryable<Invoice> GetTradingDocumentWithDetails()
+        {
+
+            if (_context == null || _context.Invoices == null)
+            {
+                return null;
+            }
+
+
+            return  _context.Invoices.AsNoTracking()
+            .Include(t => t.InvoiceLines)
+                .ThenInclude(t => t.Item)
+            .Include(t => t.PurchaseOrder)
+            .Include(t => t.Quote)
+            .Include(t => t.Rfq)
+            .Include(t => t.SalesOder)
+            .Include(t => t.Stakeholder)
+            .Include(t => t.Organization)
+            .Include(t => t.CreatedByNavigation)
+
+            .Where(m => m.IsActive == true);
+                
+
+            
+
+            
+        }
+        private async Task<Invoice> GetTradingDocumentWithDetailsAsync(int id)
+        {
+
+            if (_context == null || _context.Invoices == null)
+            {
+                return null;
+            }
+
+           
+
+            return await _context.Invoices.AsNoTracking()
+                .Include(t => t.InvoiceLines)
+                    .ThenInclude(t => t.Item)
+                .Include(t => t.PurchaseOrder)
+                .Include(t => t.Quote)
+                .Include(t => t.Rfq)
+                .Include(t => t.SalesOder)
+                .Include(t => t.Stakeholder)
+                .Include(t => t.Organization)
+                .Include(t => t.CreatedByNavigation)
+
+                .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
+        }
+        
     }
 }

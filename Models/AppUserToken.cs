@@ -5,7 +5,7 @@ namespace TradingApp.Models;
 
 public partial class AppUserToken
 {
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
 
     public string LoginProvider { get; set; } = null!;
 

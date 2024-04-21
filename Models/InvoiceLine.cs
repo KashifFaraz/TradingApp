@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TradingApp.Models;
 
-public partial class TradingDocumentDetail
+public partial class InvoiceLine
 {
     public int Id { get; set; }
 
@@ -31,5 +31,5 @@ public partial class TradingDocumentDetail
 
     public virtual Item? Item { get; set; }
 
-    public virtual TradingDocument? Master { get; set; }
+    public virtual Invoice? Master { get; set; }
 }

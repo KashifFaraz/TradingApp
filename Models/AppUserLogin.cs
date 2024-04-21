@@ -11,7 +11,7 @@ public partial class AppUserLogin
 
     public string? ProviderDisplayName { get; set; }
 
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
 
     public virtual AppUser User { get; set; } = null!;
 }

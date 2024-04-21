@@ -7,7 +7,7 @@ public partial class PaymentReconciliation
 {
     public int Id { get; set; }
 
-    public int? Paymentid { get; set; }
+    public int? PaymentId { get; set; }
 
     public int? TradingDocumentId { get; set; }
 
@@ -23,5 +23,5 @@ public partial class PaymentReconciliation
 
     public virtual Payment? Payment { get; set; }
 
-    public virtual TradingDocument? TradingDocument { get; set; }
+    public virtual Invoice? TradingDocument { get; set; }
 }

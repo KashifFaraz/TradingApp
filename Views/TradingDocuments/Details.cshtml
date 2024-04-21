@@ -1,16 +1,8 @@
-﻿@model TradingApp.Models.TradingDocument
+﻿@model TradingApp.Models.Invoice
 
 @{
     ViewData["Title"] = "Details";
 }
-<style>
-
-
-
-
-
-</style>
-
 <div class="row">
     <div class="col-sm-1">
     </div>
@@ -87,23 +79,23 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.TotalAmount)
         </dd>
-        @*  <dt class = "col-sm-2">
+          <dt class = "col-sm-2">
         @Html.DisplayNameFor(model => model.CreatedBy)
         </dt>
         <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.CreatedBy)
+        @Html.DisplayFor(model => model.CreatedByNavigation.UserName)
         </dd>
         <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.CraetedOn)
+        @Html.DisplayNameFor(model => model.CreatedOn)
         </dt>
         <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.CraetedOn)
+            @Html.DisplayFor(model => model.CreatedOn)
         </dd>
         <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.EditedBy)
+            @Html.DisplayNameFor(model => model.EditedBy)
         </dt>
         <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.EditedBy)
+            @Html.DisplayFor(model => model.EditedByNavigation.UserName)
         </dd>
         <dt class = "col-sm-2">
         @Html.DisplayNameFor(model => model.EditedOn)
@@ -111,7 +103,7 @@
         <dd class = "col-sm-10">
         @Html.DisplayFor(model => model.EditedOn)
         </dd>
-        <dt class = "col-sm-2">
+        @* <dt class = "col-sm-2">
         @Html.DisplayNameFor(model => model.Invoice)
         </dt>
         <dd class = "col-sm-10">
@@ -172,7 +164,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.TradingDocumentDetails)
+        @foreach (var item in Model.InvoiceLines)
         {
             <tr>
                
@@ -220,6 +212,6 @@
 
 
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Create" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

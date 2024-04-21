@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +12,7 @@ using TradingApp.Models;
 
 namespace TradingApp.Controllers
 {
+    [Authorize]
     public class OrganizationsController : Controller
     {
         private readonly TradingAppContext _context;
@@ -45,8 +49,10 @@ namespace TradingApp.Controllers
         }
 
         // GET: Organizations/Create
-        public IActionResult Create()
+        public IActionResult Create(bool IsOnboarding)
         {
+            ViewBag.IsOnboarding = IsOnboarding;
+
             return View();
         }
 
@@ -55,19 +61,43 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description")] Organization organization, IFormFile imageFile)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,DefaultCurrency,ImageFile")] Organization organization, bool IsOnboarding)
         {
             if (ModelState.IsValid)
             {
                 string FolderName  = RemoveInvalidCharacters(organization.Name);
                 organization.FolderName= FolderName;
                 // Save the uploaded image to the server
-                string imagePath = await SaveImageAsync(imageFile, FolderName);
+                string imagePath = await SaveImageAsync(organization.ImageFile, FolderName);
                 organization.LogoUrl= imagePath;
                 _context.Add(organization);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                int newOrganizationId = organization.Id;
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+              
+
+                if (int.TryParse(userId, out int userIdInt))
+                {
+                    var user = await _context.AppUsers.FindAsync(userIdInt);
+                    user.DefaultOrganization = newOrganizationId;
+                    await _context.SaveChangesAsync();
+                }
+
+                if (IsOnboarding)
+                {
+                    // If it's part of onboarding flow, redirect to create customer action
+                    return RedirectToAction("Create", "Customer", new { IsOnboarding = true});
+                }
+                else
+                {
+                    // If it's not part of onboarding flow, redirect to index action
+                    return RedirectToAction(nameof(Index));
+                }
+
+                //  return RedirectToAction(nameof(Index));
             }
+            ViewBag.IsOnboarding = IsOnboarding;
+
             return View(organization);
         }
 
@@ -191,7 +221,7 @@ namespace TradingApp.Controllers
         public static string RemoveInvalidCharacters(string input)
         {
             char[] invalidChars = Path.GetInvalidFileNameChars();
-            return string.Join("", input.Where(c => !invalidChars.Contains(c)));
+            return string.Join("", input.Where(c => !invalidChars.Contains(c))).Trim();
         }
     }
 }

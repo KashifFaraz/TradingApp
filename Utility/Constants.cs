@@ -1,4 +1,6 @@
-﻿namespace TradingApp.Utility
+﻿using TradingApp.Models;
+
+namespace TradingApp.Utility
 {
     public static class Constants
     {
@@ -42,5 +44,12 @@
 
         }
 
+        public static int CurrentOrganizationId = 1;
+        public static int GetOrganizationId() {
+
+            return CurrentOrganizationId += 1;
+
+
+        }
     }
 }

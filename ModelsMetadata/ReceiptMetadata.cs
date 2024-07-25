@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TradingApp.Models;
 using TradingApp.Utility;
 
@@ -9,6 +10,10 @@ namespace TradingApp.Models
     [ModelMetadataType(typeof(ReceiptMetadata))]
     public partial class Receipt
     {
+        [NotMapped]
+        public int? InvoiceId { get; set; }
+
+
         //public Constants.PaymentType PaymentType { get; set; }
 
     }
@@ -19,7 +24,7 @@ namespace TradingApp.Models
         [Display(Name = "Custom Id")]
         public string? CustomId { get; set; }
         [Required]
-        [Display(Name = "Doc. Date")]
+        [Display(Name = "Issue Date")]
         [DisplayFormat(DataFormatString = "{0:d}", NullDisplayText = "")]
         public DateTime? DocDate { get; set; }
         [Required]
@@ -43,6 +48,7 @@ namespace TradingApp.Models
         public int? PurchaseOrderId { get; set; }
         [Display(Name = "Sales Order")]
         public int? SalesOderId { get; set; }
+
         [Display(Name = "Invoice")]
         public int? InvoiceId { get; set; }
         [Display(Name = "Sub Total")]
@@ -76,7 +82,7 @@ namespace TradingApp.Models
 
         [JsonIgnore]
         public virtual ICollection<Invoice> InverseSalesOder { get; set; } = new List<Invoice>();
-        
+
         [Display(Name = "Customer")]
         public virtual Stakeholder? Stakeholder { get; set; }
 

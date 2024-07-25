@@ -20,4 +20,6 @@ public partial class Stakeholder
     public DateTime? EditedOn { get; set; }
 
     public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+
+    public virtual ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
 }

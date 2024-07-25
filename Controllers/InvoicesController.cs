@@ -15,13 +15,13 @@ using static TradingApp.Utility.Constants;
 namespace TradingApp.Controllers
 {
     [Authorize]
-    public class TradingDocumentsController : Controller
+    public class InvoicesController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly TradingAppContext _context;
 
-        public TradingDocumentsController(TradingAppContext context, UserManager<ApplicationUser> userManager)
+        public InvoicesController(TradingAppContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -212,16 +212,62 @@ namespace TradingApp.Controllers
                     invoice.Transaction = new Transaction();
                 }
                 invoice.Transaction.Type = (byte)TransectionType.Invoice;
-                invoice.Transaction.CustomId = invoice.CustomId;
                 _context.Add(invoice.Transaction);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 int transactionId = invoice.Transaction.TransactionId;
                 invoice.TransactionId = transactionId;
+                var receivableAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Accounts Receivable" && a.AccountTypeId == (int)FinanceAccountType.Asset);
+                var salesAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Sales Revenue" && a.AccountTypeId == (int)FinanceAccountType.Income);
+                var taxAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Accounts Payable" && a.AccountTypeId == (int)FinanceAccountType.Liability);
+                var discountAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Cost of Goods Sold" && a.AccountTypeId == (int)FinanceAccountType.Expense);
+
+                // Create journal entries for the invoice
+                var debitEntry = new JournalEntry
+                {
+                    TransactionType = (byte)TransectionType.Invoice,
+                    AccountId = receivableAccount.Id,
+                    TransactionId = invoice.TransactionId.Value,
+                    TransactionLineId = 0,
+                    Type = "D",
+                    Amount = invoice.TotalAmount.Value
+                };
+
+                var creditEntryForSales = new JournalEntry
+                {
+                    TransactionType = (byte)TransectionType.Invoice,
+                    AccountId = salesAccount.Id,
+                    TransactionId = invoice.TransactionId.Value,
+                    TransactionLineId = 0,
+                    Type = "C",
+                    Amount = invoice.SubTotal.Value
+                };
+                var creditEntryForTax = new JournalEntry
+                {
+                    TransactionType = (byte)TransectionType.Invoice,
+                    AccountId = taxAccount.Id,
+                    TransactionId = invoice.TransactionId.Value,
+                    TransactionLineId = 0,
+                    Type = "C",
+                    Amount = invoice.TotalAmount.Value - invoice.SubTotal.Value
+                };
+                var creditEntryForDiscount = new JournalEntry
+                {
+                    TransactionType = (byte)TransectionType.Invoice,
+                    AccountId = discountAccount.Id,
+                    TransactionId = invoice.TransactionId.Value,
+                    TransactionLineId = 0,
+                    Type = "C",
+                    Amount = 0
+                };
 
                 invoice.IsActive = true;
                 invoice.CreatedBy = Convert.ToInt32(userId);
                 invoice.CreatedOn = DateTime.Now;
                 _context.Add(invoice);
+                _context.Add(debitEntry);
+                _context.Add(creditEntryForSales);
+                _context.Add(creditEntryForTax);
+                _context.Add(creditEntryForDiscount);
                 var a = await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -237,8 +283,8 @@ namespace TradingApp.Controllers
             return View(invoice);
         }
 
-        
-       
+
+
 
         // GET: TradingDocuments/Delete/5
         public async Task<IActionResult> Delete(int? id)

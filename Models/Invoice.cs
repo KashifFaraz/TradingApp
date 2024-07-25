@@ -9,6 +9,8 @@ public partial class Invoice
 
     public int? TransactionId { get; set; }
 
+    public string? CustomId { get; set; }
+
     public DateTime? DocDate { get; set; }
 
     public int? StakeholderId { get; set; }

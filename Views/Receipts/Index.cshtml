@@ -1,14 +1,15 @@
-﻿@using System.Globalization;
-@model IEnumerable<TradingApp.Models.Invoice>
+﻿@using TradingApp.Utility;
+@using static TradingApp.Utility.Constants;
+@model IEnumerable<TradingApp.Models.Receipt>
 
 @{
-    ViewData["Title"] = "Invoice";
+    ViewData["Title"] = "Index";
 }
 
-<h1>Invoice List</h1>
+<h1>Index</h1>
 
 <p>
-    <a asp-action="Create" asp-route-id="0">New</a>
+    <a asp-action="Create">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -17,52 +18,53 @@
                 @Html.DisplayNameFor(model => model.Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.StakeholderId)
+                @Html.DisplayNameFor(model => model.CustomId)
             </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.CustomId)
-            </th>*@
             <th>
                 @Html.DisplayNameFor(model => model.DocDate)
             </th>
             @*  <th>
             @Html.DisplayNameFor(model => model.BankName)
-
             </th>
             <th>
             @Html.DisplayNameFor(model => model.AccountTitle)
-
             </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.DueDate)
-
+            </th>
+            <th>
+                Payment Method
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SubTotal)
-            </th>
+            @*  <th>
+            @Html.DisplayNameFor(model => model.SubTotal)
+            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.TotalAmount)
             </th>
-
-            @* <th>
-            @Html.DisplayNameFor(model => model.InvoiceId)
+            @*  <th>
+            @Html.DisplayNameFor(model => model.UnreconciledAmount)
             </th>
             <th>
-            @Html.DisplayNameFor(model => model.PurchaseOrderId)
+            @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
             </th>
             <th>
-            @Html.DisplayNameFor(model => model.Quote)
+            @Html.DisplayNameFor(model => model.CreatedBy)
             </th>
             <th>
-            @Html.DisplayNameFor(model => model.Rfqid)
+            @Html.DisplayNameFor(model => model.CraetedOn)
             </th>
             <th>
-            @Html.DisplayNameFor(model => model.SalesOderId)
-            </th> *@
-
+            @Html.DisplayNameFor(model => model.EditedBy)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.EditedOn)
+            </th>*@
+            <th>
+                @Html.DisplayNameFor(model => model.Stakeholder)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -74,15 +76,12 @@
                     @Html.DisplayFor(modelItem => item.Id)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Stakeholder.Name)
+                    @Html.DisplayFor(modelItem => item.CustomId)
                 </td>
-                @*  <td>
-            @Html.DisplayFor(modelItem => item.CustomId)
-            </td> *@
                 <td>
                     @Html.DisplayFor(modelItem => item.DocDate)
                 </td>
-                @*  <td>
+                @* <td>
             @Html.DisplayFor(modelItem => item.BankName)
             </td>
             <td>
@@ -92,31 +91,37 @@
                     @Html.DisplayFor(modelItem => item.DueDate)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
+                    @(((PaymentMethod)item.PaymentMethod).GetDisplayName())
                 <td>
-                    @Html.DisplayFor(modelItem => item.SubTotal)
+                        @Html.DisplayFor(modelItem => item.Description)
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TotalAmount)
-                </td>
-
-                @*  <td>
-            @Html.DisplayFor(modelItem => item.Invoice.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PurchaseOrder.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Quote.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Rfq.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.SalesOder.Id)
+                    @*  <td>
+            @Html.DisplayFor(modelItem => item.SubTotal)
             </td> *@
-
+                <td>
+                        @Html.DisplayFor(modelItem => item.TotalAmount)
+                </td>
+                    @*  <td>
+            @Html.DisplayFor(modelItem => item.UnreconciledAmount)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.PaymentReconciliationStatus)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.CreatedBy)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.CraetedOn)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.EditedBy)
+            </td>
+            <td>
+            @Html.DisplayFor(modelItem => item.EditedOn)
+            </td> *@
+                <td>
+                        @Html.DisplayFor(modelItem => item.Stakeholder.Name)
+                </td>
                 <td>
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |

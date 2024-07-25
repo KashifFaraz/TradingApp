@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TradingApp.Models;
 
-public partial class Payment
+public partial class Receipt
 {
     public int Id { get; set; }
 
@@ -19,9 +19,7 @@ public partial class Payment
 
     public DateTime? DueDate { get; set; }
 
-    public int? PaymentType { get; set; }
-
-    public byte? PaymentMethod { get; set; }
+    public byte PaymentMethod { get; set; }
 
     public string? Description { get; set; }
 
@@ -41,5 +39,9 @@ public partial class Payment
 
     public DateTime? EditedOn { get; set; }
 
-    public virtual ICollection<PaymentReconciliation> PaymentReconciliations { get; set; } = new List<PaymentReconciliation>();
+    public int? TransactionId { get; set; }
+
+    public virtual Stakeholder? Stakeholder { get; set; }
+
+    public virtual Transaction? Transaction { get; set; }
 }

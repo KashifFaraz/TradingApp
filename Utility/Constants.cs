@@ -1,4 +1,5 @@
-﻿using TradingApp.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using TradingApp.Models;
 
 namespace TradingApp.Utility
 {
@@ -30,10 +31,17 @@ namespace TradingApp.Utility
         public enum PaymentMethod
         {
 
+            [Display(Name = "Cash")]
             Cash = 0,
+
+            [Display(Name = "Bank Transfer")]
             BankTransfer = 1,
-            Cheque=2,
-            MoneyOrder =3,
+
+            [Display(Name = "Cheque")]
+            Cheque = 2,
+
+            [Display(Name = "Money Order")]
+            MoneyOrder = 3,
 
         }
         public enum TransectionType
@@ -43,7 +51,14 @@ namespace TradingApp.Utility
             Reciept = 1,
 
         }
-
+        public enum FinanceAccountType
+        {
+            Income = 0,
+            Expense = 1,
+            Asset=2,
+            Liability=3,
+            Equity=4
+    }
         public static int CurrentOrganizationId = 1;
         public static int GetOrganizationId() {
 

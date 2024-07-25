@@ -11,8 +11,8 @@ namespace TradingApp.Models
     public partial class Invoice 
     {
         //public Constants.PaymentType PaymentType { get; set; }
-        [NotMapped]
-        public string? CustomId { get; set; }
+        //[NotMapped]
+       // public string? CustomId { get; set; }
 
     }
 

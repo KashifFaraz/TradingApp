@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TradingApp.Utility;
 
 namespace TradingApp.Models;
 
@@ -17,6 +15,8 @@ public partial class TradingAppContext : DbContext
     {
     }
 
+    public virtual DbSet<AccountType> AccountTypes { get; set; }
+
     public virtual DbSet<AppRole> AppRoles { get; set; }
 
     public virtual DbSet<AppRoleClaim> AppRoleClaims { get; set; }
@@ -29,11 +29,15 @@ public partial class TradingAppContext : DbContext
 
     public virtual DbSet<AppUserToken> AppUserTokens { get; set; }
 
+    public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<InvoiceLine> InvoiceLines { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
+
+    public virtual DbSet<JournalEntry> JournalEntries { get; set; }
 
     public virtual DbSet<MeasureUnit> MeasureUnits { get; set; }
 
@@ -42,6 +46,8 @@ public partial class TradingAppContext : DbContext
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<PaymentReconciliation> PaymentReconciliations { get; set; }
+
+    public virtual DbSet<Receipt> Receipts { get; set; }
 
     public virtual DbSet<Stakeholder> Stakeholders { get; set; }
 
@@ -53,11 +59,16 @@ public partial class TradingAppContext : DbContext
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=.;Database=Dev01-TradingApp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
 
-    public int OrganizationId { get { return Constants.GetOrganizationId(); } }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AccountType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__AccountT__3214EC07A166E9D5");
 
-        modelBuilder.Entity<Invoice>().HasQueryFilter(x => x.OrganizationId == OrganizationId);
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<AppRole>(entity =>
         {
             entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
@@ -130,6 +141,23 @@ public partial class TradingAppContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.AppUserTokens).HasForeignKey(d => d.UserId);
         });
 
+        modelBuilder.Entity<ChartOfAccount>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ChartOfA__3214EC0705ACA639");
+
+            entity.Property(e => e.IsTransactionAccount).HasDefaultValueSql("((0))");
+            entity.Property(e => e.Name).HasMaxLength(100);
+
+            entity.HasOne(d => d.AccountType).WithMany(p => p.ChartOfAccounts)
+                .HasForeignKey(d => d.AccountTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__ChartOfAc__Accou__0A688BB1");
+
+            entity.HasOne(d => d.ParentAccount).WithMany(p => p.InverseParentAccount)
+                .HasForeignKey(d => d.ParentAccountId)
+                .HasConstraintName("FK__ChartOfAc__Paren__0B5CAFEA");
+        });
+
         modelBuilder.Entity<Invoice>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_TradingDocument");
@@ -141,6 +169,9 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.CreatedOn).HasColumnType("datetime");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
+                .IsUnicode(false);
+            entity.Property(e => e.CustomId)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.DocDate).HasColumnType("datetime");
@@ -224,6 +255,21 @@ public partial class TradingAppContext : DbContext
                 .HasConstraintName("FK_Item_MeasureUnit");
         });
 
+        modelBuilder.Entity<JournalEntry>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__JournalE__3214EC07D5AC7FB7");
+
+            entity.ToTable("JournalEntry");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.Type)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .IsFixedLength();
+        });
+
         modelBuilder.Entity<MeasureUnit>(entity =>
         {
             entity.ToTable("MeasureUnit");
@@ -288,6 +334,33 @@ public partial class TradingAppContext : DbContext
                 .HasConstraintName("FK_PaymentReconciliation_TradingDocument");
         });
 
+        modelBuilder.Entity<Receipt>(entity =>
+        {
+            entity.ToTable("Receipt");
+
+            entity.Property(e => e.AccountTitle).HasMaxLength(50);
+            entity.Property(e => e.BankName).HasMaxLength(50);
+            entity.Property(e => e.CraetedOn).HasColumnType("datetime");
+            entity.Property(e => e.CustomId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.DocDate).HasColumnType("datetime");
+            entity.Property(e => e.DueDate).HasColumnType("datetime");
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.SubTotal).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UnreconciledAmount).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Stakeholder).WithMany(p => p.Receipts)
+                .HasForeignKey(d => d.StakeholderId)
+                .HasConstraintName("FK_Receipt_Stakeholder");
+
+            entity.HasOne(d => d.Transaction).WithMany(p => p.Receipts)
+                .HasForeignKey(d => d.TransactionId)
+                .HasConstraintName("FK_Receipt_Transaction");
+        });
+
         modelBuilder.Entity<Stakeholder>(entity =>
         {
             entity.ToTable("Stakeholder");
@@ -309,12 +382,6 @@ public partial class TradingAppContext : DbContext
         modelBuilder.Entity<Transaction>(entity =>
         {
             entity.ToTable("Transaction");
-
-            entity.HasIndex(e => e.CustomId, "Unique_Transaction").IsUnique();
-
-            entity.Property(e => e.CustomId)
-                .HasMaxLength(50)
-                .IsUnicode(false);
         });
 
         OnModelCreatingPartial(modelBuilder);

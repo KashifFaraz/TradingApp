@@ -15,6 +15,7 @@ using static TradingApp.Utility.Constants;
 namespace TradingApp.Controllers
 {
     [Authorize]
+    //[Route("[controller]/{action=Index}/{id?}")]
     public class InvoicesController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -139,7 +140,7 @@ namespace TradingApp.Controllers
             invoice.OrganizationId = user.DefaultOrganization;
             invoice.SubTotal = invoice.InvoiceLines.Sum(x => x.Amount);
             invoice.TotalAmount = invoice.InvoiceLines.Sum(x => x.Amount);
-
+            invoice.UnreconciledAmount= invoice.InvoiceLines.Sum(x => x.Amount);
 
             // Use the userId and userName as needed in your action
 
@@ -212,6 +213,7 @@ namespace TradingApp.Controllers
                     invoice.Transaction = new Transaction();
                 }
                 invoice.Transaction.Type = (byte)TransectionType.Invoice;
+                invoice.PaymentReconciliationStatus = (byte)PaymentReconciliationStatus.NotReconciled;
                 _context.Add(invoice.Transaction);
                 await _context.SaveChangesAsync();
                 int transactionId = invoice.Transaction.TransactionId;
@@ -329,6 +331,27 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet("[controller]/Customer/{customerId?}")]
+        public async Task<IActionResult> CustomerDues(int? customerId)
+        {
+            if (customerId!=null)
+            {
+                var result = await GetCustomerDuesAsync(customerId.Value);
+
+                var stakeholder = result.stakeholder;
+                var invoices = result.invoices.ToList(); // Execute the query to get the invoices
+
+
+                var viewModel = new CustomerDuesViewModel
+                {
+                    Stakeholder = result.stakeholder,
+                    Invoices = result.invoices.ToList()
+                };
+
+                return View(viewModel);
+            }
+            return View();
+        }
         private bool TradingDocumentExists(int id)
         {
             return (_context.Invoices?.Any(e => e.Id == id)).GetValueOrDefault();
@@ -360,6 +383,27 @@ namespace TradingApp.Controllers
 
 
         }
+        private async Task<(Stakeholder stakeholder, IQueryable<Invoice> invoices)> GetCustomerDuesAsync(int customerId)
+        {
+            if (_context?.Invoices == null || _context?.Stakeholders == null)
+            {
+                return (null, Enumerable.Empty<Invoice>().AsQueryable());
+            }
+
+            // Fetch the stakeholder data once
+            var stakeholder = await _context.Stakeholders.AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == customerId);
+
+            // Fetch the invoices
+            var invoices = _context.Invoices.AsNoTracking()
+                .Where(m => m.IsActive.Value
+                    && m.StakeholderId == customerId
+                    && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled));
+
+            return (stakeholder, invoices);
+        }
+
         private async Task<Invoice> GetTradingDocumentWithDetailsAsync(int id)
         {
 

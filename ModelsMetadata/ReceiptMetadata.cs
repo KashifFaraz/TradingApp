@@ -67,6 +67,9 @@ namespace TradingApp.Models
         public int? EditedBy { get; set; }
         [Display(Name = "Last Edited On")]
         public DateTime? EditedOn { get; set; }
+        [Display(Name = "Payment Status")]
+        public byte? PaymentReconciliationStatus { get; set; }
+
 
         [JsonIgnore]
         public virtual ICollection<Invoice> InverseInvoice { get; set; } = new List<Invoice>();

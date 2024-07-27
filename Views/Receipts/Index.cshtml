@@ -65,6 +65,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Stakeholder)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -101,27 +104,16 @@
                 <td>
                         @Html.DisplayFor(modelItem => item.TotalAmount)
                 </td>
-                    @*  <td>
-            @Html.DisplayFor(modelItem => item.UnreconciledAmount)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PaymentReconciliationStatus)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.CreatedBy)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.CraetedOn)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.EditedBy)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.EditedOn)
-            </td> *@
                 <td>
                         @Html.DisplayFor(modelItem => item.Stakeholder.Name)
                 </td>
+                <td>
+                        @{
+                            var statusDisplayName = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(item.PaymentReconciliationStatus);
+                        }
+                        @Html.DisplayFor(modelItem => statusDisplayName)
+                </td>
+               
                 <td>
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |

@@ -1,4 +1,6 @@
 ﻿@using System.Globalization;
+@using TradingApp.Utility;
+@using static TradingApp.Utility.Constants;
 @model IEnumerable<TradingApp.Models.Invoice>
 
 @{
@@ -45,6 +47,9 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.TotalAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
             </th>
 
             @* <th>
@@ -99,6 +104,12 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.TotalAmount)
+                </td>
+                <td>
+                    @{
+                        var statusDisplayName = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(item.PaymentReconciliationStatus);
+                    }
+                    @Html.DisplayFor(modelItem => statusDisplayName)
                 </td>
 
                 @*  <td>

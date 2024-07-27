@@ -1,0 +1,92 @@
+﻿@using TradingApp.Utility;
+@using static TradingApp.Utility.Constants;
+@model CustomerDuesViewModel;
+
+
+@{
+    ViewData["Title"] = "CustomerDues";
+}
+
+
+
+@* <div class="row">
+    <div class="col-sm-1">
+    </div>
+    <div class="col-sm-10">
+        <h2 class="text-center">@Model.Organization?.Name</h2>
+        <h5 class="text-center">Invoice</h5>
+    </div>
+    <div class="col-sm-1">
+        <img style="    max-width: 100px;" src="@Model.Organization?.LogoUrl" alt="Company Logo">
+
+    </div>
+</div> *@
+<div>
+    <h2>Customer Dues</h2>
+    <p><strong>Name:</strong> @Model.Stakeholder.Name</p>
+    <p>
+        <strong>Total Receivable:</strong>
+        @{
+            var totalReceivable = Model.Invoices.Sum(x => x.UnreconciledAmount);
+        }
+        @totalReceivable.Value.ToString("F2")
+    </p>
+    <p>
+        <strong>
+            Unreconciled payment Amount
+            :
+        </strong> @Model.Stakeholder.Name
+    </p>
+    
+    <!-- Add more stakeholder details as needed -->
+</div>
+
+<div>
+    <h2>Invoices</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Invoice ID</th>
+                <th>Amount</th>
+                <th>Reconciliation Status</th>
+                <th>Paid Amount</th>
+                <th>UnPaid Amount</th>
+                <th>Due Date</th>
+                <!-- Add more invoice columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model.Invoices)
+            {
+                <tr>
+                    <td>@invoice.Id</td>
+                    <td>@invoice.TotalAmount</td>
+                    <td>
+                        @{
+                            var status = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(invoice.PaymentReconciliationStatus);
+                        }
+                        @status
+                    </td>
+                    <td>
+                        @((invoice.TotalAmount - invoice.UnreconciledAmount).Value.ToString("F2"))
+                    </td>
+                    <td>@invoice.UnreconciledAmount</td>
+
+
+                    <td>
+                        @if (invoice.DueDate.HasValue)
+                        {
+                            @invoice.DueDate.Value.ToString("d")
+                        }
+                        else
+                        {
+                            <span>N/A</span> <!-- or any placeholder text you prefer -->
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+

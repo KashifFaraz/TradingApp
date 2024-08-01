@@ -23,7 +23,15 @@ public partial class Item
 
     public DateTime? EditedOn { get; set; }
 
+    public int? ProductCategoryId { get; set; }
+
+    public int? ProductBrandId { get; set; }
+
     public virtual ICollection<InvoiceLine> InvoiceLines { get; set; } = new List<InvoiceLine>();
+
+    public virtual ProductBrand? ProductBrand { get; set; }
+
+    public virtual ProductCategory? ProductCategory { get; set; }
 
     public virtual MeasureUnit? SaleUnitNavigation { get; set; }
 }

@@ -40,6 +40,4 @@ public partial class Payment
     public int? EditedBy { get; set; }
 
     public DateTime? EditedOn { get; set; }
-
-    public virtual ICollection<PaymentReconciliation> PaymentReconciliations { get; set; } = new List<PaymentReconciliation>();
 }

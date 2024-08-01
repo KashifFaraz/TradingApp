@@ -25,20 +25,15 @@
     <h2>Customer Dues</h2>
     <p><strong>Name:</strong> @Model.Stakeholder.Name</p>
     <p>
-        <strong>Total Receivable:</strong>
-        @{
-            var totalReceivable = Model.Invoices.Sum(x => x.UnreconciledAmount);
-        }
-        @totalReceivable.Value.ToString("F2")
+        <strong> @Html.DisplayNameFor(model => model.TotalReceivable):</strong>
+        @Html.DisplayFor(model => model.TotalReceivable)
     </p>
+
     <p>
-        <strong>
-            Unreconciled payment Amount
-            :
-        </strong> @Model.Stakeholder.Name
+        <strong> @Html.DisplayNameFor(model => model.UnreconciledPaymentAmount):</strong>
+        @Html.DisplayFor(model => model.UnreconciledPaymentAmount)
     </p>
     
-    <!-- Add more stakeholder details as needed -->
 </div>
 
 <div>
@@ -47,10 +42,10 @@
         <thead>
             <tr>
                 <th>Invoice ID</th>
-                <th>Amount</th>
                 <th>Reconciliation Status</th>
+                <th>Amount</th>
                 <th>Paid Amount</th>
-                <th>UnPaid Amount</th>
+                <th>Unpaid Amount</th>
                 <th>Due Date</th>
                 <!-- Add more invoice columns as needed -->
             </tr>
@@ -60,17 +55,20 @@
             {
                 <tr>
                     <td>@invoice.Id</td>
-                    <td>@invoice.TotalAmount</td>
                     <td>
+
                         @{
-                            var status = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(invoice.PaymentReconciliationStatus);
+                            var status = EnumExtensions.GetEnumDisplayName < PaymentReconciliationStatus > 
+                            (invoice.PaymentReconciliationStatus);
                         }
                         @status
                     </td>
+                    <td> @Html.DisplayFor(modelItem => invoice.TotalAmount)</td>
                     <td>
-                        @((invoice.TotalAmount - invoice.UnreconciledAmount).Value.ToString("F2"))
+                        @Html.DisplayFor(modelItem => invoice.TotalPaid)
+                        @* @((invoice.TotalAmount - invoice.UnreconciledAmount).Value.ToString("F2")) *@
                     </td>
-                    <td>@invoice.UnreconciledAmount</td>
+                    <td> @Html.DisplayFor(modelItem => invoice.UnreconciledAmount)</td>
 
 
                     <td>
@@ -89,4 +87,11 @@
     </table>
 </div>
 
-
+@section Scripts {
+<script>
+   
+    function formatNumberWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+</script>
+}

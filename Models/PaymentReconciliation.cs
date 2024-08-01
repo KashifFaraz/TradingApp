@@ -21,7 +21,5 @@ public partial class PaymentReconciliation
 
     public DateTime? EditedOn { get; set; }
 
-    public virtual Payment? Payment { get; set; }
-
     public virtual Invoice? TradingDocument { get; set; }
 }

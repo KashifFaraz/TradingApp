@@ -47,6 +47,10 @@ public partial class TradingAppContext : DbContext
 
     public virtual DbSet<PaymentReconciliation> PaymentReconciliations { get; set; }
 
+    public virtual DbSet<ProductBrand> ProductBrands { get; set; }
+
+    public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+
     public virtual DbSet<Receipt> Receipts { get; set; }
 
     public virtual DbSet<Stakeholder> Stakeholders { get; set; }
@@ -250,6 +254,14 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 0)");
 
+            entity.HasOne(d => d.ProductBrand).WithMany(p => p.Items)
+                .HasForeignKey(d => d.ProductBrandId)
+                .HasConstraintName("FK_Item_ProductBrand");
+
+            entity.HasOne(d => d.ProductCategory).WithMany(p => p.Items)
+                .HasForeignKey(d => d.ProductCategoryId)
+                .HasConstraintName("FK_Item_ProductCategory");
+
             entity.HasOne(d => d.SaleUnitNavigation).WithMany(p => p.Items)
                 .HasForeignKey(d => d.SaleUnit)
                 .HasConstraintName("FK_Item_MeasureUnit");
@@ -325,13 +337,33 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.CraetedOn).HasColumnType("datetime");
             entity.Property(e => e.EditedOn).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Payment).WithMany(p => p.PaymentReconciliations)
-                .HasForeignKey(d => d.PaymentId)
-                .HasConstraintName("FK_PaymentReconciliation_Payment");
-
             entity.HasOne(d => d.TradingDocument).WithMany(p => p.PaymentReconciliations)
                 .HasForeignKey(d => d.TradingDocumentId)
                 .HasConstraintName("FK_PaymentReconciliation_TradingDocument");
+        });
+
+        modelBuilder.Entity<ProductBrand>(entity =>
+        {
+            entity.ToTable("ProductBrand");
+
+            entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Name).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<ProductCategory>(entity =>
+        {
+            entity.ToTable("ProductCategory");
+
+            entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Name).HasMaxLength(100);
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_ProductCategory_ProductCategory");
         });
 
         modelBuilder.Entity<Receipt>(entity =>

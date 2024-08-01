@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Invoice>
+<h3>Invoice Dashboard</h3>
+
+
+
+<div class="row">
+    <div class="col-sm-6">
+        <h6>Unreconciled Invoices </h6>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Invoice ID</th>
+                    <th>Invoice Date</th>
+                    <th>Due Date</th>
+                    <th>Customer</th>
+                    <th class="text-end">Total Amount</th>
+                    <th class="text-end">Unpaid Amount</th>
+                    <!-- Add other necessary columns -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invoice in Model)
+                {
+                    <tr>
+                        <td> <a asp-controller="Invoices" asp-action="Details" asp-route-id="@invoice.Id">@invoice.Id 📃 </a>  </td>
+                        <td>@invoice.DocDate?.ToString("d")</td>
+                        <td>@invoice.DueDate?.ToString("d")</td>
+                        <td>@invoice.Stakeholder.Name</td>
+                        <td class="text-end">@Html.DisplayFor(modelItem => invoice.TotalAmount)</td>
+                        <td class="text-end">@Html.DisplayFor(modelItem => invoice.UnreconciledAmount)</td>
+                        <!-- Add other necessary columns -->
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+

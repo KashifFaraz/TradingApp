@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -140,7 +141,7 @@ namespace TradingApp.Controllers
             invoice.OrganizationId = user.DefaultOrganization;
             invoice.SubTotal = invoice.InvoiceLines.Sum(x => x.Amount);
             invoice.TotalAmount = invoice.InvoiceLines.Sum(x => x.Amount);
-            invoice.UnreconciledAmount= invoice.InvoiceLines.Sum(x => x.Amount);
+            invoice.UnreconciledAmount = invoice.InvoiceLines.Sum(x => x.Amount);
 
             // Use the userId and userName as needed in your action
 
@@ -154,7 +155,7 @@ namespace TradingApp.Controllers
                 if (ModelState.IsValid)
                 {
 
-                    var oldTradingDocument = await _context.Invoices.AsNoTracking()
+                    var oldInvoice = await _context.Invoices.AsNoTracking()
                .Include(t => t.InvoiceLines)
                .ThenInclude(t => t.Item)
                .Include(t => t.PurchaseOrder)
@@ -165,16 +166,31 @@ namespace TradingApp.Controllers
                .Include(t => t.Organization)
                .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
 
-                    if (oldTradingDocument == null)
+                    if (oldInvoice == null)
                     {
                         return NotFound();
                     }
 
+                    if (oldInvoice.UnreconciledAmount != oldInvoice.TotalAmount)
+                    {
 
+                        ModelState.AddModelError(string.Empty, "Invoice Can not be changed, payment already exist");
+
+                        ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
+                        ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
+                        ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
+                        ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
+                        ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
+                        ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
+                        ViewData["Item"] = _context.Items.ToList();
+
+
+                        return View(invoice);
+                    }
                     try
                     {
-                        invoice.CreatedBy = oldTradingDocument.CreatedBy;
-                        invoice.CreatedOn = oldTradingDocument.CreatedOn;
+                        invoice.CreatedBy = oldInvoice.CreatedBy;
+                        invoice.CreatedOn = oldInvoice.CreatedOn;
                         invoice.IsActive = true;
                         invoice.EditedBy = Convert.ToInt32(userId);
                         invoice.EditedOn = DateTime.Now;
@@ -334,7 +350,7 @@ namespace TradingApp.Controllers
         [HttpGet("[controller]/Customer/{customerId?}")]
         public async Task<IActionResult> CustomerDues(int? customerId)
         {
-            if (customerId!=null)
+            if (customerId != null)
             {
                 var result = await GetCustomerDuesAsync(customerId.Value);
 
@@ -345,12 +361,25 @@ namespace TradingApp.Controllers
                 var viewModel = new CustomerDuesViewModel
                 {
                     Stakeholder = result.stakeholder,
-                    Invoices = result.invoices.ToList()
+                    TotalReceivable = result.invoices.Sum(x => x.UnreconciledAmount ?? 0),
+                    Invoices = result.invoices.ToList(),
+                    UnreconciledPaymentAmount = result.UnreconciledPaymentAmount.Sum() ?? 0, // Adjusted to sum the amounts
                 };
-
+                viewModel.Invoices.ToList().ForEach(x => x.TotalPaid = (x.TotalAmount ?? 0) - (x.UnreconciledAmount ?? 0));
                 return View(viewModel);
+
             }
             return View();
+        }
+        [HttpGet("Dashboard")]
+        public async Task<IActionResult> Dashboard(DateTime? ToDate, int pageNumber = 1, int pageSize = 5)
+        {
+            if (ToDate==null)
+            {
+                ToDate = DateTime.Today;
+            }
+            var unreconcileInvoices = await GetDueUnreconcileInvoices(ToDate.Value, pageNumber, pageSize).ToListAsync();
+            return View(unreconcileInvoices);
         }
         private bool TradingDocumentExists(int id)
         {
@@ -383,11 +412,11 @@ namespace TradingApp.Controllers
 
 
         }
-        private async Task<(Stakeholder stakeholder, IQueryable<Invoice> invoices)> GetCustomerDuesAsync(int customerId)
+        private async Task<(Stakeholder stakeholder, IQueryable<Invoice> invoices, IQueryable<decimal?> UnreconciledPaymentAmount)> GetCustomerDuesAsync(int customerId)
         {
             if (_context?.Invoices == null || _context?.Stakeholders == null)
             {
-                return (null, Enumerable.Empty<Invoice>().AsQueryable());
+                return (null, Enumerable.Empty<Invoice>().AsQueryable(), Enumerable.Empty<decimal?>().AsQueryable());
             }
 
             // Fetch the stakeholder data once
@@ -401,9 +430,37 @@ namespace TradingApp.Controllers
                     && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
                         || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled));
 
-            return (stakeholder, invoices);
+            var unreconciledPaymentAmount = _context.Receipts
+                .Where(r => r.StakeholderId == customerId)
+                .Select(x => x.UnreconciledAmount);
+
+            return (stakeholder, invoices, unreconciledPaymentAmount);
         }
 
+        private IQueryable<Invoice> GetDueUnreconcileInvoices(DateTime ToDate, int pageNumber, int pageSize)
+        {
+            if (_context?.Invoices == null)
+            {
+                return (Enumerable.Empty<Invoice>().AsQueryable());
+            }
+
+
+            // Fetch the invoices
+            var invoices = _context.Invoices
+                .Include(t => t.Stakeholder).AsNoTracking()
+            .Where(m => m.IsActive.Value
+                    && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled)
+                    && (m.DueDate<ToDate || m.DueDate == null)
+                        )
+                    
+            .OrderByDescending(x => x.DueDate)
+                       .Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            var wow = invoices.ToQueryString();
+
+            return invoices;
+        }
         private async Task<Invoice> GetTradingDocumentWithDetailsAsync(int id)
         {
 
@@ -427,6 +484,8 @@ namespace TradingApp.Controllers
 
                 .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
         }
+
+
 
     }
 }

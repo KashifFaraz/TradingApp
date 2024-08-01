@@ -12,8 +12,10 @@ namespace TradingApp.Models
     {
         //public Constants.PaymentType PaymentType { get; set; }
         //[NotMapped]
-       // public string? CustomId { get; set; }
-
+        // public string? CustomId { get; set; }
+        
+        [NotMapped]
+        public decimal TotalPaid { get; set; }
     }
 
 
@@ -55,6 +57,12 @@ namespace TradingApp.Models
         [Display(Name = "Total Amount")]
         [DisplayFormat(DataFormatString = "{0:N}")]
         public decimal? TotalAmount { get; set; }
+        [Display(Name = "Total Paid")]
+        [DisplayFormat(DataFormatString = "{0:N}")]
+        public decimal TotalPaid { get; set; }
+        [Display(Name = "Unpaid Amount")]
+        [DisplayFormat(DataFormatString = "{0:N}")]
+        public decimal UnreconciledAmount { get; set; }
         public Constants.PaymentType PaymentType { get; set; }
 
         [Display(Name = "Created By")]

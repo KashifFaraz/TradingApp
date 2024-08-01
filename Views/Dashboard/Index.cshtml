@@ -1,0 +1,9 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+
+<!-- Invoke the ViewComponent -->
+@await Component.InvokeAsync("InvoiceList", new { ToDate=DateTime.Today, pageNumber = 1, pageSize = 5 })

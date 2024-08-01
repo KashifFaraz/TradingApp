@@ -52,6 +52,8 @@ namespace TradingApp.Controllers
             ViewBag.IsOnboarding = IsOnboarding;
 
             ViewData["Id"] = new SelectList(_context.MeasureUnits, "Id", "Name");
+            ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
+            ViewData["ProductBrand"] = new SelectList(_context.ProductBrands, "Id", "Name");
             return View();  
         }
 
@@ -80,6 +82,8 @@ namespace TradingApp.Controllers
             ViewBag.IsOnboarding = IsOnboarding;
 
             ViewData["Id"] = new SelectList(_context.MeasureUnits, "Id", "Name", item.Id);
+            ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
+            ViewData["ProductBrand"] = new SelectList(_context.ProductBrands, "Id", "Name");
             return View(item);
         }
 
@@ -97,6 +101,8 @@ namespace TradingApp.Controllers
                 return NotFound();
             }
             ViewData["Id"] = new SelectList(_context.MeasureUnits, "Id", "Name", item.Id);
+            ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
+            ViewData["ProductBrand"] = new SelectList(_context.ProductBrands, "Id", "Name");
             return View(item);
         }
 
@@ -133,6 +139,8 @@ namespace TradingApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["Id"] = new SelectList(_context.MeasureUnits, "Id", "Name", item.Id);
+            ViewData["ProductCategory"] = new SelectList(_context.ProductCategories, "Id", "Name");
+            ViewData["ProductBrand"] = new SelectList(_context.ProductBrands, "Id", "Name");
             return View(item);
         }
 

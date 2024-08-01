@@ -26,6 +26,10 @@
                     <ul class="navbar-nav flex-grow-1">
                         @if (SignInManager.IsSignedIn(User))
                         {
+                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            </li>
+
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
@@ -38,9 +42,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Items" asp-action="Index">Items</a>
                             </li>
-                            <li class="nav-item">
+                           @*  <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Stakeholders" asp-action="Index">Customers</a>
-                            </li>
+                            </li> *@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-dark" href="#" id="customersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Customers
@@ -48,7 +52,7 @@
                                 <ul class="dropdown-menu" aria-labelledby="customersDropdown">
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Stakeholders" asp-action="Index">All Customers</a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Stakeholders" asp-action="Create">Add Customer</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Invoices" asp-action="Customer">Customer Dues </a></li>
+                                  
                                 </ul>
                             </li>
                             <li class="nav-item">
@@ -64,6 +68,12 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Payments" asp-action="Index">Payments</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductCategories" asp-action="Index">Product Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductBrands" asp-action="Index">Product Brand</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="Index">Setup</a>
                             </li>
                             @*
@@ -77,7 +87,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

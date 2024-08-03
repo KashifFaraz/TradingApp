@@ -1,9 +1,28 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Index";
 }
 
 
+<h3>Dashboard</h3>
+<div class="row justify-content-evenly">
 
-<!-- Invoke the ViewComponent -->
-@await Component.InvokeAsync("InvoiceList", new { ToDate=DateTime.Today, pageNumber = 1, pageSize = 5 })
+    <div id="DueUnreconcileInvoicesContainer" class="col-sm-6">
+    </div>
+    <div id="customersDueInvoicesContainer" class="col-sm-4">
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $.get('/Invoices/CustomersDueInvoices', { ToDate: @DateTime.Today.ToString("MM/dd/yyyy"), pageNumber: 1, pageSize: 5 }, function (data) {
+                $('#customersDueInvoicesContainer').html(data);
+            });
+        });
+        $(document).ready(function () {
+            $.get('/Invoices/DueUnreconcileInvoices', { ToDate: @DateTime.Today.ToString("MM/dd/yyyy"), pageNumber: 1, pageSize: 5 }, function (data) {
+                $('#DueUnreconcileInvoicesContainer').html(data);
+            });
+        });
+    </script>
+    }

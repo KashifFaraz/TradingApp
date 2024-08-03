@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using TradingApp.Models;
+using TradingApp.ViewModels;
 using static TradingApp.Utility.Constants;
 
 namespace TradingApp.Controllers
@@ -371,15 +372,34 @@ namespace TradingApp.Controllers
             }
             return View();
         }
-        [HttpGet("Dashboard")]
-        public async Task<IActionResult> Dashboard(DateTime? ToDate, int pageNumber = 1, int pageSize = 5)
+        [HttpGet, ActionName("DueUnreconcileInvoices")]
+        public async Task<IActionResult> DueUnreconcileInvoices(DateTime? ToDate, int pageNumber = 1, int pageSize = 5)
         {
             if (ToDate==null)
             {
                 ToDate = DateTime.Today;
             }
             var unreconcileInvoices = await GetDueUnreconcileInvoices(ToDate.Value, pageNumber, pageSize).ToListAsync();
-            return View(unreconcileInvoices);
+            return PartialView("DueUnreconcileInvoices", unreconcileInvoices); // Ensure the partial view is in the right path
+
+           
+        }
+        [HttpGet, ActionName("CustomersDueInvoices")]
+        public async Task<IActionResult> CustomersDueInvoices(DateTime? ToDate, int pageNumber = 1, int pageSize = 5)
+        {
+            if (ToDate == null)
+            {
+                ToDate = DateTime.Today;
+            }
+            var unreconcileInvoices = await GetCustomerDueInvoicesCount(ToDate.Value, pageNumber, pageSize).ToListAsync();
+            var viewModel = unreconcileInvoices.Select(i => new CustomerDueInvoicesViewModel
+            {
+                StakeholderId = i.StakeholderId,
+                Name = i.Name,
+                UnpaidInvoice = i.UnpaidInvoice,
+                TotalAmount = i.TotalAmount
+            }).ToList();
+            return View(viewModel);
         }
         private bool TradingDocumentExists(int id)
         {
@@ -461,6 +481,37 @@ namespace TradingApp.Controllers
 
             return invoices;
         }
+       
+        private IQueryable<dynamic> GetCustomerDueInvoicesCount(DateTime toDate, int pageNumber, int pageSize)
+        {
+            if (_context?.Invoices == null)
+            {
+                return Enumerable.Empty<dynamic>().AsQueryable();
+            }
+
+            var invoices = _context.Invoices
+                .Include(t => t.Stakeholder).AsNoTracking()
+                .Where(m => m.IsActive.Value
+                    && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled)
+                    && (m.DueDate < toDate || m.DueDate == null))
+                .GroupBy(group => new { group.StakeholderId, group.Stakeholder.Name })
+                .Select(x => new
+                {
+                    x.Key.StakeholderId,
+                    x.Key.Name,
+                    UnpaidInvoice = x.Count(),
+                    TotalAmount = x.Sum(y => y.TotalAmount ?? 0)
+                })
+                .OrderByDescending(x => x.TotalAmount)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
+
+            var query = invoices.ToQueryString();
+
+            return invoices;
+        }
+
         private async Task<Invoice> GetTradingDocumentWithDetailsAsync(int id)
         {
 

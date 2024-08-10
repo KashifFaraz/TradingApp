@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using TradingApp.Models;
 using TradingApp.Utility;
 using static TradingApp.Utility.Constants;
@@ -75,13 +76,17 @@ namespace TradingApp.Controllers
             {
                 receipt.Transaction = new Transaction();
             }
-
+            // Saving Receipt
             receipt.Transaction.Type = (byte)TransectionType.Invoice;
             receipt.UnreconciledAmount = receipt.TotalAmount ?? 0;
             _context.Add(receipt);
             await _context.SaveChangesAsync();
 
             receipt.TransactionId = receipt.Transaction.TransactionId;
+            
+            
+            // Accouting Entry
+
             var cashAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Cash" && a.AccountTypeId == (int)FinanceAccountType.Asset);
             var receivableAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Accounts Receivable" && a.AccountTypeId == (int)FinanceAccountType.Asset);
 
@@ -248,9 +253,132 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        [HttpGet("[controller]/{id}/Reconcile")]
+        public async Task<IActionResult> ReconcileInvoice(int? id)
+        {
+            var receipt = await _context.Receipts
+               .FirstOrDefaultAsync(m => m.Id == id);
+
+            receipt.TotalReconciled= (receipt.TotalAmount??0)-(receipt.UnreconciledAmount??0);
+            ViewBag.ReceiptId = id;
+            ViewBag.Receipt = receipt;
+
+              var tradingDocument = await GetUnreconcileInvoices(1, 50).ToListAsync();
+
+
+            return View(tradingDocument);
+        }
+        [HttpPost, ActionName("Reconcile")]
+        public async Task<IActionResult> ReconcileInvoice(int ReceiptId, string selectedInvoices)
+        {
+            // Deserialize the JSON string into a list of invoice reconciliation models
+            var selectedInvoiceList = JsonConvert.DeserializeObject<List<InvoiceReconciliationModel>>(selectedInvoices);
+
+            // Fetch the receipt from the database
+            var receipt = await _context.Receipts.FindAsync(ReceiptId);
+
+            if (receipt == null)
+            {
+                
+                return Json(new { success = false, message = "Receipt not found." });
+
+            }
+
+            // Calculate the total amount to be reconciled from the selected invoices
+            decimal toReconcileAmount = selectedInvoiceList.Sum(i => i.amount);
+
+            // Check if the amount to reconcile matches the receipt's unreconciled amount
+            if (toReconcileAmount != receipt.UnreconciledAmount)
+            {
+                return Json(new { success = false, message = "The total amount to be reconciled does not match the receipt's unreconciled amount." });
+
+            }
+
+            foreach (var item in selectedInvoiceList)
+            {
+                // Fetch the invoice from the database
+                var invoice = await _context.Invoices.AsNoTracking().FirstOrDefaultAsync(m => m.Id == item.invoiceId && m.IsActive == true);
+          
+
+                if (invoice == null)
+                {
+                    return Json(new { success = false, message = $"Invoice with ID {item.invoiceId} not found." });
+                }
+
+                // Create a new PaymentReconciliation entry
+                var paymentReconciliation = new PaymentReconciliation
+                {
+                    Amount = item.amount,
+                    PaymentId = ReceiptId,
+                    TradingDocumentId = item.invoiceId
+                };
+
+                // Add the payment reconciliation to the context
+                _context.PaymentReconciliations.Add(paymentReconciliation);
+
+                // Update the invoice's unreconciled amount
+                invoice.UnreconciledAmount -= item.amount;
+
+                // Update the invoice's reconciliation status
+                invoice.PaymentReconciliationStatus = invoice.UnreconciledAmount > 0
+                    ? (byte)PaymentReconciliationStatus.PartialReconciled
+                    : (byte)PaymentReconciliationStatus.Reconciled;
+
+                // Update the invoice in the context
+                _context.Invoices.Update(invoice);
+            }
+
+            // Update the receipt's unreconciled amount
+            receipt.UnreconciledAmount -= toReconcileAmount;
+
+            // Update the receipt's reconciliation status
+            receipt.PaymentReconciliationStatus = receipt.UnreconciledAmount > 0
+                ? (byte)PaymentReconciliationStatus.PartialReconciled
+                : (byte)PaymentReconciliationStatus.Reconciled;
+
+            // Update the receipt in the context
+            _context.Receipts.Update(receipt);
+
+            // Save all changes to the database
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Reconciliation successful." });
+        }
+
+        public class InvoiceReconciliationModel
+        {
+            public int invoiceId { get; set; }
+            public decimal amount { get; set; }
+        }
+        //repo methods
         private bool ReceiptExists(int id)
         {
           return (_context.Receipts?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private IQueryable<Invoice> GetUnreconcileInvoices(int pageNumber, int pageSize)
+        {
+            if (_context?.Invoices == null)
+            {
+                return (Enumerable.Empty<Invoice>().AsQueryable());
+            }
+
+
+            // Fetch the invoices
+            var invoices = _context.Invoices
+                .Include(t => t.Stakeholder).AsNoTracking()
+            .Where(m => m.IsActive.Value
+                    && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled)
+                    )
+
+            .OrderByDescending(x => x.DueDate)
+                       .Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            var wow = invoices.ToQueryString();
+
+            return invoices;
         }
     }
 }

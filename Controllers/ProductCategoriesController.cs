@@ -45,26 +45,39 @@ namespace TradingApp.Controllers
         }
 
         // GET: ProductCategories/Create
-        public IActionResult Create()
+        public IActionResult Create(bool IsOnboarding)
         {
+            ViewBag.IsOnboarding = IsOnboarding;
             ViewData["ParentId"] = new SelectList(_context.ProductCategories, "Id", "Id");
             return View();
         }
+       
 
         // POST: ProductCategories/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,IsActive,CreatedBy,CreatedOn,EditedBy,EditedOn,ParentId")] ProductCategory productCategory)
+        public async Task<IActionResult> Create([Bind("Id,Name,IsActive,CreatedBy,CreatedOn,EditedBy,EditedOn,ParentId")] ProductCategory productCategory, bool IsOnboarding)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(productCategory);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (IsOnboarding)
+                {
+                    // If it's part of onboarding flow, redirect to create customer action
+                    return RedirectToAction("Create", "ProductBrands", new { IsOnboarding = true });
+                }
+                else
+                {
+                    // If it's not part of onboarding flow, redirect to index action
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["ParentId"] = new SelectList(_context.ProductCategories, "Id", "Id", productCategory.ParentId);
+
+           
             return View(productCategory);
         }
 

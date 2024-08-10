@@ -23,12 +23,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.DocDate)
             </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.BankName)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.AccountTitle)
-            </th> *@
+           
             <th>
                 @Html.DisplayNameFor(model => model.DueDate)
             </th>
@@ -38,36 +33,20 @@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.SubTotal)
-            </th> *@
+           
             <th>
                 @Html.DisplayNameFor(model => model.TotalAmount)
             </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.UnreconciledAmount)
-            </th>
             <th>
-            @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
+                @Html.DisplayNameFor(model => model.UnreconciledAmount)
             </th>
-            <th>
-            @Html.DisplayNameFor(model => model.CreatedBy)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.CraetedOn)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.EditedBy)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.EditedOn)
-            </th>*@
             <th>
                 @Html.DisplayNameFor(model => model.Stakeholder)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
             </th>
+            <th></th>
             <th></th>
         </tr>
     </thead>
@@ -84,12 +63,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.DocDate)
                 </td>
-                @* <td>
-            @Html.DisplayFor(modelItem => item.BankName)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.AccountTitle)
-            </td> *@
+              
                 <td>
                     @Html.DisplayFor(modelItem => item.DueDate)
                 </td>
@@ -98,11 +72,12 @@
                 <td>
                         @Html.DisplayFor(modelItem => item.Description)
                 </td>
-                    @*  <td>
-            @Html.DisplayFor(modelItem => item.SubTotal)
-            </td> *@
+                  
                 <td>
                         @Html.DisplayFor(modelItem => item.TotalAmount)
+                </td>
+                <td>
+                        @Html.DisplayFor(modelItem => item.UnreconciledAmount)
                 </td>
                 <td>
                         @Html.DisplayFor(modelItem => item.Stakeholder.Name)
@@ -119,7 +94,160 @@
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>
                 </td>
+                <td>
+                    <!-- Example button to open the drawer -->
+                    <button type="button" class="btn btn-primary" data-url="Receipts/@item.Id/Reconcile" onclick="openDrawer(this)">
+                        Reconcile
+                    </button>
+
+
+                </td>
             </tr>
         }
     </tbody>
 </table>
+<!-- Add this HTML to your main layout or specific view -->
+<div class="offcanvas offcanvas-end offcanvas-custom" tabindex="-1" id="rightDrawer" aria-labelledby="rightDrawerLabel">
+    <div class="offcanvas-header">
+        <h5 id="rightDrawerLabel">Unpaid Invoice</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="drawerContent">
+        <!-- Content will be loaded here -->
+    </div>
+</div>
+
+<style>
+
+    .offcanvas-custom {
+        width: 80%; 
+    }
+
+</style>
+
+@section Scripts {
+    <script>
+        function formatNumberWithCommas(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        function updateToReconcileAmount() {
+            var total = 0;
+            $('input[type="checkbox"]:checked').each(function () {
+                var reconcileAmount = parseFloat($(this).closest('tr').find('input[name="ToReconcileAmount"]').val()) || 0;
+                total += reconcileAmount;
+            });
+            $('#toReconcileAmount').text(formatNumberWithCommas(total.toFixed(2)));
+        }
+
+        function reconcile() {
+
+            $('#reconcileForm').on('submit', function (e) {
+                e.preventDefault(); // Prevent the form from submitting normally
+
+                collectSelectedInvoices();
+
+                var form = $(this);
+                var url = form.attr('action') || '@Url.Action("Reconcile", "Receipts")';
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: {
+                        ReceiptId: $('input[name="ReceiptId"]').val(),
+                        selectedInvoices: $('#selectedInvoices').val(),
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // Close the drawer and refresh the main content (if necessary)
+                            // Hide the offcanvas drawer
+                            var offcanvasElement = document.getElementById('rightDrawer');
+                            var offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement);
+                            offcanvasInstance.hide();
+                            window.location.reload();
+                            alert(response.message);
+                           
+                        } else {
+                            // Handle error by displaying the message
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        alert(error);
+
+                        console.error('Failed to reconcile invoices: ', error);
+                    }
+                });
+            });
+        
+        }
+        function openDrawer(button) {
+            var url = $(button).data('url');
+
+            // Load content via AJAX
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function (data) {
+                    // Inject the loaded content into the drawer
+                    $('#drawerContent').html(data);
+
+                    // Initialize the offcanvas drawer
+                    var myOffcanvas = new bootstrap.Offcanvas(document.getElementById('rightDrawer'));
+                    myOffcanvas.show();
+
+                    // Reinitialize the JavaScript for the loaded content
+                    initializeCheckboxBehavior();
+                    reconcile();
+                    updateToReconcileAmount();
+                    // Update the total reconcile amount when a checkbox is checked/unchecked
+                    $('input[type="checkbox"]').change(function () {
+                        updateToReconcileAmount();
+                    });
+
+                    // Update the total reconcile amount when the input value changes
+                    $('input[name="ToReconcileAmount"]').on('input', function () {
+                        updateToReconcileAmount();
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Failed to load content: ', error);
+                }
+            });
+        }
+
+        function initializeCheckboxBehavior() {
+            $('input[type="checkbox"]').change(function () {
+                var $checkbox = $(this);
+                var isChecked = $checkbox.is(':checked');
+                var unreconciledAmount = $checkbox.data('unreconciled-amount');
+                var $amountInput = $checkbox.closest('tr').find('.amount-input');
+
+                if (isChecked) {
+                    $amountInput.val(unreconciledAmount).prop('disabled', false);
+                } else {
+                    $amountInput.val('').prop('disabled', true);
+                }
+            });
+        }
+
+        function collectSelectedInvoices() {
+            var selectedInvoices = [];
+
+            $('.invoice-checkbox:checked').each(function () {
+                var invoiceId = $(this).data('id');
+                var amount = $(this).closest('tr').find('.amount-input').val();
+                selectedInvoices.push({ invoiceId: invoiceId, amount: amount });
+            });
+
+            $('#selectedInvoices').val(JSON.stringify(selectedInvoices));
+        }
+
+        $(document).ready(function () {
+            initializeCheckboxBehavior();
+            reconcile();
+        });
+
+    </script>
+
+}

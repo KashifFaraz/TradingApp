@@ -71,7 +71,7 @@ namespace TradingApp.Controllers
                 if (IsOnboarding)
                 {
                     // If it's part of onboarding flow, redirect to create Invoices action
-                    return RedirectToAction("Create", "Invoice", new {id =0});
+                    return RedirectToAction("Create", "Invoices", new {id =0});
                 }
                 else
                 {

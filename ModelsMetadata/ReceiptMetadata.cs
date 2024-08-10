@@ -13,7 +13,9 @@ namespace TradingApp.Models
         [NotMapped]
         public int? InvoiceId { get; set; }
 
-
+        [NotMapped]
+        [DisplayFormat(DataFormatString = "{0:N}")]
+        public decimal TotalReconciled { get; set; }
         //public Constants.PaymentType PaymentType { get; set; }
 
     }

@@ -21,20 +21,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.StakeholderId)
             </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.CustomId)
-            </th>*@
             <th>
                 @Html.DisplayNameFor(model => model.DocDate)
             </th>
-            @*  <th>
-            @Html.DisplayNameFor(model => model.BankName)
-
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.AccountTitle)
-
-            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.DueDate)
 
@@ -52,21 +41,7 @@
                 @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
             </th>
 
-            @* <th>
-            @Html.DisplayNameFor(model => model.InvoiceId)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.PurchaseOrderId)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Quote)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.Rfqid)
-            </th>
-            <th>
-            @Html.DisplayNameFor(model => model.SalesOderId)
-            </th> *@
+          
 
             <th></th>
         </tr>
@@ -81,18 +56,10 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Stakeholder.Name)
                 </td>
-                @*  <td>
-            @Html.DisplayFor(modelItem => item.CustomId)
-            </td> *@
                 <td>
                     @Html.DisplayFor(modelItem => item.DocDate)
                 </td>
-                @*  <td>
-            @Html.DisplayFor(modelItem => item.BankName)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.AccountTitle)
-            </td> *@
+                
                 <td>
                     @Html.DisplayFor(modelItem => item.DueDate)
                 </td>
@@ -112,28 +79,16 @@
                     @Html.DisplayFor(modelItem => statusDisplayName)
                 </td>
 
-                @*  <td>
-            @Html.DisplayFor(modelItem => item.Invoice.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.PurchaseOrder.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Quote.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.Rfq.Id)
-            </td>
-            <td>
-            @Html.DisplayFor(modelItem => item.SalesOder.Id)
-            </td> *@
+              
 
                 <td>
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>  |
-                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
+                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>|
+                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Invoice</a>
                 </td>
+               
             </tr>
         }
     </tbody>

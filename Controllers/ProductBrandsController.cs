@@ -45,8 +45,10 @@ namespace TradingApp.Controllers
         }
 
         // GET: ProductBrands/Create
-        public IActionResult Create()
+        public IActionResult Create(bool IsOnboarding)
         {
+            ViewBag.IsOnboarding = IsOnboarding;
+
             return View();
         }
 
@@ -55,13 +57,23 @@ namespace TradingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,IsActive,CreatedBy,CreatedOn,EditedBy,EditedOn")] ProductBrand productBrand)
+        public async Task<IActionResult> Create([Bind("Id,Name,IsActive,CreatedBy,CreatedOn,EditedBy,EditedOn")] ProductBrand productBrand, bool IsOnboarding)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(productBrand);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (IsOnboarding)
+                {
+                    // If it's part of onboarding flow, redirect to create Invoices action
+                    return RedirectToAction("Create", "Items", new { IsOnboarding = true });
+                }
+                else
+                {
+                    // If it's not part of onboarding flow, redirect to index action
+                    return RedirectToAction(nameof(Index));
+                }
+
             }
             return View(productBrand);
         }

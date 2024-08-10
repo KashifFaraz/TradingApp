@@ -1,0 +1,95 @@
+﻿@using TradingApp.Utility;
+@using static TradingApp.Utility.Constants;
+@model IEnumerable<TradingApp.Models.Invoice>
+
+@{
+    ViewData["Title"] = "Reconcile Invoice";
+    Layout = null;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-header">Total Receipt Amount</div>
+                <div class="card-body">
+                    <h5 class="card-title">@ViewBag.Receipt.TotalAmount</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Total Reconciled Amount</div>
+                <div class="card-body">
+                    <h5 class="card-title">@ViewBag.Receipt.TotalReconciled</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Total Unreconciled Amount</div>
+                <div class="card-body">
+                    <h5 class="card-title">@ViewBag.Receipt.UnreconciledAmount</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">To Reconcile Amount</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="toReconcileAmount">0</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<form id="reconcileForm">
+    <div class="form-group">
+        <input id="reconcileButton" type="submit" value="Reconcile" class="btn btn-primary" />
+    </div>
+    <input type="hidden" name="ReceiptId" value="@ViewBag.ReceiptId" />
+    <input type="hidden" id="selectedInvoices" name="selectedInvoices" />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Html.DisplayNameFor(model => model.Id)</th>
+                <th>@Html.DisplayNameFor(model => model.StakeholderId)</th>
+                <th>@Html.DisplayNameFor(model => model.DocDate)</th>
+                <th>@Html.DisplayNameFor(model => model.DueDate)</th>
+                <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
+                <th>@Html.DisplayNameFor(model => model.UnreconciledAmount)</th>
+                <th>To Reconcile</th>
+                <th>@Html.DisplayNameFor(model => model.PaymentReconciliationStatus)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input invoice-checkbox" type="checkbox" data-id="@item.Id" data-unreconciled-amount="@item.UnreconciledAmount">
+                        </div>
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Stakeholder.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DocDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DueDate)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TotalAmount)</td>
+                    <td>@Html.DisplayFor(modelItem => item.UnreconciledAmount)</td>
+                    <td><input type="text" class="amount-input form-input form-control" name="ToReconcileAmount" disabled></td>
+                    <td>
+                        @{
+                            var statusDisplayName = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(item.PaymentReconciliationStatus);
+                        }
+                        @Html.DisplayFor(modelItem => statusDisplayName)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>

@@ -59,6 +59,10 @@ namespace TradingApp.Models
         [Display(Name = "Total Amount")]
         [DisplayFormat(DataFormatString = "{0:N}")]
         public decimal? TotalAmount { get; set; }
+        [Display(Name = "Unreconciled Amount")]
+        [DisplayFormat(DataFormatString = "{0:N}")] 
+        public decimal? UnreconciledAmount { get; set; }
+
         public Constants.PaymentType PaymentType { get; set; }
 
         [Display(Name = "Created By")]

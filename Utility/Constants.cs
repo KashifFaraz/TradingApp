@@ -30,7 +30,7 @@ namespace TradingApp.Utility
         public enum PaymentReconciliationStatus : byte
         {
             [Display(Name = "Not Reconciled")]
-            NotReconciled = 0,
+            Unreconciled = 0,
 
             [Display(Name = "Partial Reconciled")]
             PartialReconciled = 1,

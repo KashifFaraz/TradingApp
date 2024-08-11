@@ -1,7 +1,9 @@
 ﻿@using System.Globalization;
 @using TradingApp.Utility;
+@using TradingApp.ViewModels;
 @using static TradingApp.Utility.Constants;
-@model IEnumerable<TradingApp.Models.Invoice>
+@model PaginatedList<TradingApp.Models.Invoice>
+
 
 @{
     ViewData["Title"] = "Invoice";
@@ -16,29 +18,29 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.DisplayNameFor(model => model.First().Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.StakeholderId)
+                @Html.DisplayNameFor(model => model.First().StakeholderId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DocDate)
+                @Html.DisplayNameFor(model => model.First().DocDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DueDate)
+                @Html.DisplayNameFor(model => model.First().DueDate)
 
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.First().Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SubTotal)
+                @Html.DisplayNameFor(model => model.First().SubTotal)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TotalAmount)
+                @Html.DisplayNameFor(model => model.First().TotalAmount)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
+                @Html.DisplayNameFor(model => model.First().PaymentReconciliationStatus)
             </th>
 
           
@@ -85,11 +87,55 @@
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>  |
-                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>|
-                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Invoice</a>
+                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
                 </td>
                
             </tr>
         }
     </tbody>
 </table>
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @if (Model.HasPreviousPage)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)">Previous</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == Model.PageIndex)
+            {
+                <li class="page-item active">
+                    <span class="page-link">@i</span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)">Next</a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+        }
+    </ul>
+</nav>

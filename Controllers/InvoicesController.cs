@@ -33,12 +33,13 @@ namespace TradingApp.Controllers
 
 
         // GET: TradingDocuments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
         {
-            var tradingDocument = await GetTradingDocumentWithDetails().ToListAsync();
+            var totalItems = await _context.Invoices.CountAsync();
+            var invoices = await GetInvoices(pageNumber,pageSize).ToListAsync();
 
-
-            return View(tradingDocument);
+            var model = new PaginatedList<Invoice>(invoices, totalItems, pageNumber, pageSize);
+            return View(model);
         }
 
         // GET: TradingDocuments/Details/5
@@ -230,7 +231,7 @@ namespace TradingApp.Controllers
                     invoice.Transaction = new Transaction();
                 }
                 invoice.Transaction.Type = (byte)TransectionType.Invoice;
-                invoice.PaymentReconciliationStatus = (byte)PaymentReconciliationStatus.NotReconciled;
+                invoice.PaymentReconciliationStatus = (byte)PaymentReconciliationStatus.Unreconciled;
                 _context.Add(invoice.Transaction);
                 await _context.SaveChangesAsync();
                 int transactionId = invoice.Transaction.TransactionId;
@@ -375,14 +376,14 @@ namespace TradingApp.Controllers
         [HttpGet, ActionName("DueUnreconcileInvoices")]
         public async Task<IActionResult> DueUnreconcileInvoices(DateTime? ToDate, int pageNumber = 1, int pageSize = 5)
         {
-            if (ToDate==null)
+            if (ToDate == null)
             {
                 ToDate = DateTime.Today;
             }
             var unreconcileInvoices = await GetDueUnreconcileInvoices(ToDate.Value, pageNumber, pageSize).ToListAsync();
             return PartialView("DueUnreconcileInvoices", unreconcileInvoices); // Ensure the partial view is in the right path
 
-           
+
         }
         [HttpGet, ActionName("CustomersDueInvoices")]
         public async Task<IActionResult> CustomersDueInvoices(DateTime? ToDate, int pageNumber = 1, int pageSize = 5)
@@ -405,7 +406,7 @@ namespace TradingApp.Controllers
         {
             return (_context.Invoices?.Any(e => e.Id == id)).GetValueOrDefault();
         }
-        private IQueryable<Invoice> GetTradingDocumentWithDetails()
+        private IQueryable<Invoice> GetInvoices(int pageNumber , int pageSize)
         {
 
             if (_context == null || _context.Invoices == null)
@@ -415,22 +416,13 @@ namespace TradingApp.Controllers
 
 
             return _context.Invoices.AsNoTracking()
-            .Include(t => t.InvoiceLines)
-                .ThenInclude(t => t.Item)
-            .Include(t => t.PurchaseOrder)
-            .Include(t => t.Quote)
-            .Include(t => t.Rfq)
-            .Include(t => t.SalesOder)
             .Include(t => t.Stakeholder)
             .Include(t => t.Organization)
-            //.Include(t => t.CreatedByNavigation)
-
-            .Where(m => m.IsActive == true);
-
-
-
-
-
+            .Where(m => m.IsActive == true)
+            .OrderBy(i => i.Id) // Sort by the desired field
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking();
         }
         private async Task<(Stakeholder stakeholder, IQueryable<Invoice> invoices, IQueryable<decimal?> UnreconciledPaymentAmount)> GetCustomerDuesAsync(int customerId)
         {
@@ -448,7 +440,7 @@ namespace TradingApp.Controllers
                 .Where(m => m.IsActive.Value
                     && m.StakeholderId == customerId
                     && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
-                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled));
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.Unreconciled));
 
             var unreconciledPaymentAmount = _context.Receipts
                 .Where(r => r.StakeholderId == customerId)
@@ -470,10 +462,10 @@ namespace TradingApp.Controllers
                 .Include(t => t.Stakeholder).AsNoTracking()
             .Where(m => m.IsActive.Value
                     && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
-                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled)
-                    && (m.DueDate<ToDate || m.DueDate == null)
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.Unreconciled)
+                    && (m.DueDate < ToDate || m.DueDate == null)
                         )
-                    
+
             .OrderByDescending(x => x.DueDate)
                        .Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
@@ -481,7 +473,7 @@ namespace TradingApp.Controllers
 
             return invoices;
         }
-       
+
         private IQueryable<dynamic> GetCustomerDueInvoicesCount(DateTime toDate, int pageNumber, int pageSize)
         {
             if (_context?.Invoices == null)
@@ -493,7 +485,7 @@ namespace TradingApp.Controllers
                 .Include(t => t.Stakeholder).AsNoTracking()
                 .Where(m => m.IsActive.Value
                     && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
-                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled)
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.Unreconciled)
                     && (m.DueDate < toDate || m.DueDate == null))
                 .GroupBy(group => new { group.StakeholderId, group.Stakeholder.Name })
                 .Select(x => new

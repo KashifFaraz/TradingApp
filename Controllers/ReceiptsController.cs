@@ -370,7 +370,7 @@ namespace TradingApp.Controllers
                 .Include(t => t.Stakeholder).AsNoTracking()
             .Where(m => m.IsActive.Value
                     && (m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.PartialReconciled
-                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.NotReconciled)
+                        || m.PaymentReconciliationStatus == (byte)PaymentReconciliationStatus.Unreconciled)
                     )
 
             .OrderByDescending(x => x.DueDate)

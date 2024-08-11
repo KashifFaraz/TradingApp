@@ -1,4 +1,5 @@
 ﻿@using TradingApp.Utility;
+@using TradingApp.Views.Helper;
 @using static TradingApp.Utility.Constants;
 @model IEnumerable<TradingApp.Models.Receipt>
 
@@ -23,7 +24,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.DocDate)
             </th>
-           
+
             <th>
                 @Html.DisplayNameFor(model => model.DueDate)
             </th>
@@ -33,7 +34,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
-           
+
             <th>
                 @Html.DisplayNameFor(model => model.TotalAmount)
             </th>
@@ -47,7 +48,7 @@
                 @Html.DisplayNameFor(model => model.PaymentReconciliationStatus)
             </th>
             <th></th>
-            <th></th>
+            
         </tr>
     </thead>
     <tbody>
@@ -63,7 +64,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.DocDate)
                 </td>
-              
+
                 <td>
                     @Html.DisplayFor(modelItem => item.DueDate)
                 </td>
@@ -72,7 +73,7 @@
                 <td>
                         @Html.DisplayFor(modelItem => item.Description)
                 </td>
-                  
+
                 <td>
                         @Html.DisplayFor(modelItem => item.TotalAmount)
                 </td>
@@ -84,24 +85,32 @@
                 </td>
                 <td>
                         @{
-                            var statusDisplayName = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(item.PaymentReconciliationStatus);
+                            var badgeDetails = BadgeHelper.GetBadgeDetails(item.PaymentReconciliationStatus, item.Id);
                         }
-                        @Html.DisplayFor(modelItem => statusDisplayName)
+
+                        @if (badgeDetails.DataUrl != null)
+                        {
+                        <a href="javascript:void(0);"
+                           class="badge @badgeDetails.BadgeClass"
+                           data-url="@badgeDetails.DataUrl"
+                           onclick="@badgeDetails.OnClickAttribute">
+                                @badgeDetails.StatusDisplayName
+                        </a>
+                        }
+                        else
+                        {
+                        <span class="badge @badgeDetails.BadgeClass">
+                                @badgeDetails.StatusDisplayName
+                        </span>
+                        }
                 </td>
-               
+
                 <td>
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>
                 </td>
-                <td>
-                    <!-- Example button to open the drawer -->
-                    <button type="button" class="btn btn-primary" data-url="Receipts/@item.Id/Reconcile" onclick="openDrawer(this)">
-                        Reconcile
-                    </button>
-
-
-                </td>
+               
             </tr>
         }
     </tbody>
@@ -117,10 +126,27 @@
     </div>
 </div>
 
+@{
+    string GetBadgeClass(PaymentReconciliationStatus status)
+    {
+        switch (status)
+        {
+            case PaymentReconciliationStatus.Reconciled:
+                return "bg-success"; // Green
+            case PaymentReconciliationStatus.PartialReconciled:
+                return "bg-warning text-dark"; // Yellow
+            case PaymentReconciliationStatus.Unreconciled:
+                return "bg-danger"; // Red
+            default:
+                return "bg-secondary"; // Grey as a fallback
+        }
+    }
+}
+
 <style>
 
     .offcanvas-custom {
-        width: 80%; 
+        width: 80%;
     }
 
 </style>
@@ -165,7 +191,7 @@
                             offcanvasInstance.hide();
                             window.location.reload();
                             alert(response.message);
-                           
+
                         } else {
                             // Handle error by displaying the message
                             alert(response.message);
@@ -179,7 +205,7 @@
                     }
                 });
             });
-        
+
         }
         function openDrawer(button) {
             var url = $(button).data('url');

@@ -63,9 +63,11 @@ namespace TradingApp.Controllers
             {
                 _context.Add(measureUnit);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true, message = "Record created successfully!" });
+                // return RedirectToAction(nameof(Index));
             }
-            return View(measureUnit);
+            return Json(new { success = false, message = "Validation failed." });
+            //return View(measureUnit);
         }
 
         // GET: MeasureUnits/Edit/5

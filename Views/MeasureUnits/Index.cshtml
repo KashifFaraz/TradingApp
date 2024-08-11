@@ -2,12 +2,12 @@
 
 @{
     ViewData["Title"] = "Index";
+    Layout = null;
 }
 
-<h1>Index</h1>
-
 <p>
-    <a asp-action="Create">Create New</a>
+    @* <a asp-action="Create">Create New</a> *@
+    <a href="#" id="createMeasurementUnit">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -33,3 +33,15 @@
 }
     </tbody>
 </table>
+
+<script>
+    $(document).ready(function () {
+        $('#createMeasurementUnit').click(function (e) {
+            e.preventDefault(); // Prevent the default anchor behavior
+
+            $.get('/MeasureUnits/Create', function (data) {
+                $('#MeasurementUnitDiv').html(data);
+            });
+        });
+    });
+</script>

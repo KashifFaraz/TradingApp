@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Delete";
+    Layout = null;
 }
 
 <h1>Delete</h1>
@@ -11,17 +12,56 @@
     <h4>MeasureUnit</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
     </dl>
+    @using (Html.BeginForm("Delete", "MeasureUnits", FormMethod.Post, new { id = "createForm" }))
+    {
+
+        <input type="hidden" asp-for="Id"/>
+    <input type="submit" value="Delete" class="btn btn-danger" />
+ 
     
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    }
 </div>
+<div id="resultContainer"></div>
+<div>
+    <a href="#" id="listMeasurementUnit">Back to List</a>
+</div>
+<script>
+
+
+
+    $(document).ready(function () {
+
+        $('#listMeasurementUnit').click(function (e) {
+            e.preventDefault(); // Prevent the default anchor behavior
+
+            $.get('/MeasureUnits/index', function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+
+        $('#createForm').submit(function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            $.ajax({
+                type: "POST",
+                url: $(this).attr('action'),
+                data: $(this).serialize(), // Serialize the form data
+                success: function (response) {
+                    // Handle the response (e.g., show a success message, clear the form, etc.)
+                    $('#resultContainer').html('<div class="alert alert-success">Record created successfully!</div>');
+                },
+                error: function (xhr, status, error) {
+                    // Handle any errors
+                    $('#resultContainer').html('<div class="alert alert-danger">Error: ' + error + '</div>');
+                }
+            });
+        });
+    });
+</script>

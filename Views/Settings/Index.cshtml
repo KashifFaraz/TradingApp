@@ -1,6 +1,5 @@
-﻿@* <div class="container mt-5"> *@
-<div class="row">
-    <!-- Sidebar -->
+﻿@* <div class="row">
+    <!-- Main Sidebar -->
     <div class="col-md-3">
         <div class="list-group">
             <a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="list">
@@ -9,30 +8,17 @@
             <a href="#general" class="list-group-item list-group-item-action" data-bs-toggle="list">
                 General
             </a>
-            <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                Notifications
-            </a>
-            <a href="#privacy" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                Privacy
-            </a>
-            <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                Security
-            </a>
-            <a href="#account" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                Account
-            </a>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="col-md-9">
         <div class="tab-content">
-
-
             <!-- Profile Section -->
             <div class="tab-pane fade show active" id="profile">
-                <h3>Profile Settings</h3>
+                <h5>Profile Settings</h5>
                 <form>
+                    <!-- Profile Form Content -->
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" placeholder="Enter your username">
@@ -48,147 +34,138 @@
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </form>
             </div>
+
             <!-- General Section -->
-            <div class="tab-pane fade show" id="general">
-                <h3>General Settings</h3>
+            <div class="tab-pane fade" id="general">
                 <div class="row">
-                    <!-- Sidebar -->
+                    <!-- Nested Sidebar -->
                     <div class="col-md-3">
                         <div class="list-group">
-                            <a href="#aMeasurementUnits" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                            <a id="MeasurementUnitLink" href="#aMeasurementUnits" class="list-group-item list-group-item-action active" data-bs-toggle="list">
                                 Measurement Units
                             </a>
-
-                            <a href="#notifications1" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                                Notifications
+                            <a href="#aProdutCategory" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                                Product Category
                             </a>
-                            <a href="#privacy1" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                                Privacy
-                            </a>
-                            <a href="#security1" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                                Security
-                            </a>
-                            <a href="#account1" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                                Account
+                            <a href="#aProductBrand" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                                Product Brand
                             </a>
                         </div>
                     </div>
 
-                    <!-- Main Content -->
+                    <!-- Nested Content -->
                     <div class="col-md-9">
                         <div class="tab-content">
-
-
-                            <!-- Profile Section -->
+                            <!-- Measurement Unit -->
                             <div class="tab-pane fade show active" id="aMeasurementUnits">
-                                <h6>Measurement Units</h6>
-                                <div id="MeasurementUnitDiv"></div>
+                                <h5>Measurement Units</h5>
+                                <div id="MeasurementUnitDiv" class="tabData"></div>
                             </div>
 
-
-                            <!-- Notifications Section -->
-                            <div class="tab-pane fade" id="notifications1">
-                                <h3>Notification Settings</h3>
-
+                            <!-- Product Category -->
+                            <div class="tab-pane fade" id="aProdutCategory">
+                                <h5>Product Category</h5>
+                                <div id="ProdutCategoryDiv" class="tabData"></div>
                             </div>
 
-                            <!-- Privacy Section -->
-                            <div class="tab-pane fade" id="privacy1">
-                                <h3>Privacy Settings</h3>
-
-                            </div>
-
-                            <!-- Security Section -->
-                            <div class="tab-pane fade" id="security1">
-                                <h3>Security Settings</h3>
-
-                            </div>
-
-                            <!-- Account Section -->
-                            <div class="tab-pane fade" id="account1">
-                                <h3>Account Settings</h3>
-
+                            <!-- Product Brand -->
+                            <div class="tab-pane fade" id="aProductBrand">
+                                <h5>Product Brand</h5>
                             </div>
                         </div>
                     </div>
                 </div>
-
-            </div>
-
-            <!-- Notifications Section -->
-            <div class="tab-pane fade" id="notifications">
-                <h3>Notification Settings</h3>
-                <form>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="emailNotifications">
-                        <label class="form-check-label" for="emailNotifications">
-                            Email Notifications
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="smsNotifications">
-                        <label class="form-check-label" for="smsNotifications">
-                            SMS Notifications
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
-                </form>
-            </div>
-
-            <!-- Privacy Section -->
-            <div class="tab-pane fade" id="privacy">
-                <h3>Privacy Settings</h3>
-                <form>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="publicProfile">
-                        <label class="form-check-label" for="publicProfile">
-                            Public Profile
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="searchEngineIndexing">
-                        <label class="form-check-label" for="searchEngineIndexing">
-                            Allow search engines to index my profile
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
-                </form>
-            </div>
-
-            <!-- Security Section -->
-            <div class="tab-pane fade" id="security">
-                <h3>Security Settings</h3>
-                <form>
-                    <div class="mb-3">
-                        <label for="currentPassword" class="form-label">Current Password</label>
-                        <input type="password" class="form-control" id="currentPassword" placeholder="Enter your current password">
-                    </div>
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label">New Password</label>
-                        <input type="password" class="form-control" id="newPassword" placeholder="Enter your new password">
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your new password">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Change Password</button>
-                </form>
-            </div>
-
-            <!-- Account Section -->
-            <div class="tab-pane fade" id="account">
-                <h3>Account Settings</h3>
-                <form>
-                    <div class="mb-3">
-                        <label for="deleteAccount" class="form-label">Delete Account</label>
-                        <button type="button" class="btn btn-danger" id="deleteAccount">Delete Account</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
+</div> *@
+
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="d-flex flex-column p-3 bg-light">
+            <h4 class="mb-3">Settings</h4>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <!-- Profile Section -->
+                <li class="nav-item">
+                    <a href="" id="profile" class="nav-link active" data-bs-toggle="tab">
+                        <i class="bi bi-person-circle"></i> Profile
+                    </a>
+                </li>
+
+                <!-- General Section -->
+                <li class="nav-item">
+                    <div class="nav-link" id="generalLink" role="button">
+                        <i class="bi bi-gear"></i> General
+                    </div>
+                    <ul class="nav flex-column ms-3 mt-1 collapse" id="generalMenu">
+                        <li class="nav-item">
+                            <a href="" id="aMeasurementUnits" class="nav-link general-item" data-bs-toggle="tab">
+                                <i class="bi bi-rulers"></i> Measurement Units
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="" id="aProdutCategory" class="nav-link general-item" data-bs-toggle="tab">
+                                <i class="bi bi-tags"></i> Product Category
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="" id="aProductBrand" class="nav-link general-item" data-bs-toggle="tab">
+                                <i class="bi bi-briefcase"></i> Product Brand
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Add more main sections as needed -->
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div id="SettingContent" class="tabData"></div>
+    </div>
 </div>
-@* </div> *@
+
+<script>
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            // Check if this link is a parent with child items
+            const isParentWithChildren = this.nextElementSibling && this.nextElementSibling.classList.contains('collapse');
+
+            // Handle parent item clicks
+            if (isParentWithChildren) {
+                // Toggle the visibility of the child menu
+                const childMenu = this.nextElementSibling;
+                const isExpanded = childMenu.classList.contains('show');
+
+                // Collapse all other child menus
+                document.querySelectorAll('.nav.flex-column.ms-3.mt-1').forEach(function (menu) {
+                    if (menu !== childMenu) {
+                        menu.classList.remove('show');
+                        menu.classList.add('collapse');
+                    }
+                });
+
+                // Toggle the clicked child menu
+                childMenu.classList.toggle('collapse', isExpanded);
+                childMenu.classList.toggle('show', !isExpanded);
+
+                // Optionally, remove the "disabled" class to indicate it's active
+                this.classList.remove('disabled');
+            } else {
+                // Deactivate all nav links
+                document.querySelectorAll('.nav-link').forEach(function (link) {
+                    link.classList.remove('active');
+                });
+
+                // Activate the clicked link
+                this.classList.add('active');
+            }
+        });
+    });
+</script>
+
 
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -197,10 +174,42 @@
 <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
 
+
 <script>
+
+
+
+
     $(document).ready(function () {
-        $.get('/MeasureUnits/Index', function (data) {
-            $('#MeasurementUnitDiv').html(data);
+
+
+        // $.get('/MeasureUnits/Index', function (data) {
+
+        //     $('.tabData').html('');
+        //     $('#SettingContent').html(data);
+        // });
+
+
+
+        $('#aMeasurementUnits').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+            $.get('/MeasureUnits/Index', function (data) {
+                $('#SettingContent').html(data);
+            });
         });
+        $('#aProdutCategory').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+            $.get('/ProductCategories/Index', function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+
+        // $.get('/ProductCategories/Index', function (data) {
+        //     $('#ProdutCategoryDiv').html(data);
+        // });
+
+        //$('.tabData').html('');
     });
 </script>

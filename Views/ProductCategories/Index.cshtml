@@ -2,12 +2,14 @@
 
 @{
     ViewData["Title"] = "Index";
+    Layout = null;
 }
 
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    @* <a asp-action="Create">Create New</a> *@
+    <a href="#" id="createButton">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -18,18 +20,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedOn)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EditedBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EditedOn)
-            </th>
+           
             <th>
                 @Html.DisplayNameFor(model => model.Parent)
             </th>
@@ -45,27 +36,39 @@
             <td>
                 @Html.DisplayFor(modelItem => item.IsActive)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedOn)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EditedBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EditedOn)
-            </td>
+            
             <td>
                 @Html.DisplayFor(modelItem => item.Parent.Id)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Create" asp-route-id="@item.Id">Edit</a> |
+              @*   <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
+                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
+                    <a href="#" class="deleteRecordLink" data-id="@item.Id">Delete</a>
             </td>
         </tr>
 }
     </tbody>
 </table>
+
+<script>
+    $(document).ready(function () {
+        $('#createButton').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+            $.get('/ProductCategories/Create', function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+
+        $('.deleteRecordLink').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+            var recordId = $(this).data('id');
+
+            $.get('/ProductCategories/Delete/' + recordId, function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+    });
+</script>

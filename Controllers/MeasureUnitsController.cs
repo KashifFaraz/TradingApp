@@ -146,7 +146,7 @@ namespace TradingApp.Controllers
         {
             if (_context.MeasureUnits == null)
             {
-                return Problem("Entity set 'TradingAppContext.MeasureUnits'  is null.");
+                return Json(new { success = false, message = "something went!" });
             }
             var measureUnit = await _context.MeasureUnits.FindAsync(id);
             if (measureUnit != null)
@@ -155,7 +155,7 @@ namespace TradingApp.Controllers
             }
             
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+               return Json(new { success = true, message = "Record delete successfully!" });
         }
 
         private bool MeasureUnitExists(int id)

@@ -25,9 +25,12 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Create" asp-route-id="@item.Id">Edit</a> |
+                @* <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
+                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
+                    <a href="#" class="deleteRecordLink" data-id="@item.Id">Delete</a>
+
+
             </td>
         </tr>
 }
@@ -37,10 +40,20 @@
 <script>
     $(document).ready(function () {
         $('#createMeasurementUnit').click(function (e) {
-            e.preventDefault(); // Prevent the default anchor behavior
-
+            e.preventDefault();
+            $('.tabData').html('');
             $.get('/MeasureUnits/Create', function (data) {
-                $('#MeasurementUnitDiv').html(data);
+                $('#SettingContent').html(data);
+            });
+        });
+
+        $('.deleteRecordLink').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+            var recordId = $(this).data('id'); 
+
+            $.get('/MeasureUnits/Delete/' + recordId, function (data) {
+                $('#SettingContent').html(data);
             });
         });
     });

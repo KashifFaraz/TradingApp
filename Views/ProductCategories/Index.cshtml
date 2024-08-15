@@ -5,11 +5,12 @@
     Layout = null;
 }
 
-<h1>Index</h1>
+
 
 <p>
-    @* <a asp-action="Create">Create New</a> *@
-    <a href="#" id="createButton">Create New</a>
+    <a href="#" id="createButton" class="btn btn-primary btn-lg shadow-sm">
+        <i class="fas fa-plus-circle"></i> Create New
+    </a>
 </p>
 <table class="table">
     <thead>
@@ -42,8 +43,6 @@
             </td>
             <td>
                 <a asp-action="Create" asp-route-id="@item.Id">Edit</a> |
-              @*   <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
-                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
                     <a href="#" class="deleteRecordLink" data-id="@item.Id">Delete</a>
             </td>
         </tr>
@@ -56,10 +55,18 @@
         $('#createButton').click(function (e) {
             e.preventDefault();
             $('.tabData').html('');
-            $.get('/ProductCategories/Create', function (data) {
-                $('#SettingContent').html(data);
-            });
+            $.get('/ProductCategories/Create')
+                .done(function (data) {
+                    $('#SettingContent').html(data);
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error("Request failed: " + textStatus + ", " + errorThrown);
+                  //  $('#SettingContent').html('<p>Error loading content. Please try again later.</p>');
+                    $('#SettingContent').html(jqXHR.responseText);
+                });
         });
+
+
 
         $('.deleteRecordLink').click(function (e) {
             e.preventDefault();

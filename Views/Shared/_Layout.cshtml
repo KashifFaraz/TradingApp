@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TradingApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-+w8JF5z3J+J8Z5mRqD9bt/fFSXqjcM4gt4CSt2z4HYDfoDSNlx90RT8PfrIbICNtc8BgXnTXGBE6OB4YJDFIgA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <header>
@@ -36,9 +37,9 @@
                             @*  <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Organizations" asp-action="Index">Setup</a>
                         </li> *@
-                            <li class="nav-item">
+                           @*  <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="MeasureUnits" asp-action="Index">Measure Unit</a>
-                            </li>
+                            </li> *@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Items" asp-action="Index">Items</a>
                             </li>
@@ -55,9 +56,9 @@
                                   
                                 </ul>
                             </li>
-                            <li class="nav-item">
+                           @*  <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="StakeholderTypes" asp-action="Index">StakeholderTypes</a>
-                            </li>
+                            </li> *@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Invoices" asp-action="Index">Invoice</a>
                             </li>
@@ -67,12 +68,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Payments" asp-action="Index">Payments</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductCategories" asp-action="Index">Product Category</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductBrands" asp-action="Index">Product Brand</a>
-                            </li>
+                           
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
                             </li>

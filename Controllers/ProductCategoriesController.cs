@@ -71,14 +71,21 @@ namespace TradingApp.Controllers
                 }
                 else
                 {
-                    // If it's not part of onboarding flow, redirect to index action
-                    return RedirectToAction(nameof(Index));
+                    return Json(new { success = true, message = "Record created successfully!" });
                 }
             }
+
             ViewData["ParentId"] = new SelectList(_context.ProductCategories, "Id", "Id", productCategory.ParentId);
 
-           
-            return View(productCategory);
+            if (IsOnboarding)
+            {
+                // If it's part of onboarding flow, redirect to create customer action
+                return View(productCategory);
+            }
+            else
+            {
+                return Json(new { success = false, message = "Validation failed." });
+            }
         }
 
         // GET: ProductCategories/Edit/5

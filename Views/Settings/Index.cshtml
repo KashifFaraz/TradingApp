@@ -173,6 +173,8 @@
 <script src="~/js/site.js" asp-append-version="true"></script>
 <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 
 
 <script>
@@ -181,15 +183,6 @@
 
 
     $(document).ready(function () {
-
-
-        // $.get('/MeasureUnits/Index', function (data) {
-
-        //     $('.tabData').html('');
-        //     $('#SettingContent').html(data);
-        // });
-
-
 
         $('#aMeasurementUnits').click(function (e) {
             e.preventDefault();
@@ -201,15 +194,23 @@
         $('#aProdutCategory').click(function (e) {
             e.preventDefault();
             $('.tabData').html('');
-            $.get('/ProductCategories/Index', function (data) {
+
+            $.get('/ProductCategories/Index')
+                .done(function (data) {
+                    $('#SettingContent').html(data);
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error("Request failed: " + textStatus + ", " + errorThrown);
+                    $('#SettingContent').html('<p>Error loading content. Please try again later.</p>');
+                });
+        });
+
+        $('#aProductBrand').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+            $.get('/ProductBrands/Index', function (data) {
                 $('#SettingContent').html(data);
             });
         });
-
-        // $.get('/ProductCategories/Index', function (data) {
-        //     $('#ProdutCategoryDiv').html(data);
-        // });
-
-        //$('.tabData').html('');
     });
 </script>

@@ -2,15 +2,20 @@
 
 @{
     ViewData["Title"] = "Create";
+    if (ViewBag.IsOnboarding == null || ViewBag.IsOnboarding==false)
+    {
+        Layout = null;
+    }
 }
 
-<h1>Create</h1>
 
-<h4>ProductCategory</h4>
+
+<h4>Product Category</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        @using (Html.BeginForm("Create", "ProductCategories", FormMethod.Post, new { id = "createForm" }))
+    {
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" name="IsOnboarding" value="@ViewBag.IsOnboarding.ToString().ToLower()" />
             <div class="form-group">
@@ -45,11 +50,43 @@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
-        </form>
+       }
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
+<div id="resultContainer"></div>
+<div>
+    <a href="#" id="listButton">Back to List</a>
+</div>
+<script>
+
+
+
+    $(document).ready(function () {
+
+        $('#listButton').click(function (e) {
+            e.preventDefault();
+
+            $.get('/ProductCategories/index', function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+
+        $('#createForm').submit(function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                url: $(this).attr('action'),
+                data: $(this).serialize(), 
+                success: function (response) {
+                    $('#resultContainer').html('<div class="alert alert-success">Record created successfully!</div>');
+                },
+                error: function (xhr, status, error) {
+                    $('#resultContainer').html('<div class="alert alert-danger">Error: ' + error + '</div>');
+                }
+            });
+        });
+    });
+</script>

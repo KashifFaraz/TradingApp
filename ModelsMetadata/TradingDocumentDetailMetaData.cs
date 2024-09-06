@@ -15,7 +15,12 @@ namespace TradingApp.Models
         [Required]
         public int? ItemId { get; set; }
         [Required]
+        [Display(Name = "Unit Price")]
+        [DisplayFormat(DataFormatString = "{0:N}")]
         public decimal? UnitPrice { get; set; }
+        [Display(Name = "Amount")]
+        [DisplayFormat(DataFormatString = "{0:N}")]
+        public decimal? Amount { get; set; }
         [Required]
         public int? Quantity { get; set; }
 

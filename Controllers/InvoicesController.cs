@@ -12,7 +12,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using TradingApp.Models;
 using TradingApp.ViewModels;
+using static NuGet.Packaging.PackagingConstants;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static TradingApp.Utility.Constants;
+using NuGet.Packaging.Signing;
+using TradingApp.DTOs;
+using TradingApp.Models.Extension;
 
 namespace TradingApp.Controllers
 {
@@ -33,12 +38,12 @@ namespace TradingApp.Controllers
 
 
         // GET: TradingDocuments
-        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> Index([FromQuery]PaginationFilter filters)
         {
             var totalItems = await _context.Invoices.CountAsync();
-            var invoices = await GetInvoices(pageNumber,pageSize).ToListAsync();
+            var invoices = await GetInvoices(filters).ToListAsync();
 
-            var model = new PaginatedList<Invoice>(invoices, totalItems, pageNumber, pageSize);
+            var model = new PaginatedList<Invoice>(invoices, totalItems, filters.PageNumber, filters.PageSize);
             return View(model);
         }
 
@@ -406,7 +411,7 @@ namespace TradingApp.Controllers
         {
             return (_context.Invoices?.Any(e => e.Id == id)).GetValueOrDefault();
         }
-        private IQueryable<Invoice> GetInvoices(int pageNumber , int pageSize)
+        private IQueryable<Invoice> GetInvoices(PaginationFilter filters)
         {
 
             if (_context == null || _context.Invoices == null)
@@ -414,15 +419,19 @@ namespace TradingApp.Controllers
                 return null;
             }
 
+            
 
-            return _context.Invoices.AsNoTracking()
+            var invoices = _context.Invoices.AsNoTracking()
             .Include(t => t.Stakeholder)
             .Include(t => t.Organization)
             .Where(m => m.IsActive == true)
             .OrderBy(i => i.Id) // Sort by the desired field
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((filters.PageNumber - 1) * filters.PageSize)
+            .Take(filters.PageSize)
             .AsNoTracking();
+
+            invoices = ModelExtension.ApplyFilters(invoices, filters);
+            return invoices;
         }
         private async Task<(Stakeholder stakeholder, IQueryable<Invoice> invoices, IQueryable<decimal?> UnreconciledPaymentAmount)> GetCustomerDuesAsync(int customerId)
         {

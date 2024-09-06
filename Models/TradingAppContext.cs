@@ -1,18 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using TradingApp.Models.Config;
 
 namespace TradingApp.Models;
 
 public partial class TradingAppContext : DbContext
 {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+   
     public TradingAppContext()
     {
     }
 
-    public TradingAppContext(DbContextOptions<TradingAppContext> options)
+    public TradingAppContext(DbContextOptions<TradingAppContext> options, IHttpContextAccessor httpContextAccessor)
         : base(options)
     {
+        _httpContextAccessor = httpContextAccessor;
+
     }
 
     public virtual DbSet<AccountType> AccountTypes { get; set; }
@@ -65,6 +72,19 @@ public partial class TradingAppContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        base.OnModelCreating(modelBuilder);
+        // Configure shadow properties for tenant filtering
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (entityType.ClrType.GetProperty("TenantId") != null)
+            {
+                modelBuilder.Entity(entityType.ClrType).Property<int>("TenantId");
+            }
+        }
+
+
+
         modelBuilder.Entity<AccountType>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__AccountT__3214EC07A166E9D5");
@@ -420,4 +440,5 @@ public partial class TradingAppContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+  
 }

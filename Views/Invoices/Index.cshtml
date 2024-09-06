@@ -13,8 +13,57 @@
 <h1>Invoice List</h1>
 
 <p>
-    <a asp-action="Create" asp-route-id="0">New</a>
+    <a class="btn btn-primary btn-lg shadow-sm" asp-action="Create" asp-route-id="0">
+        <i class="fas fa-plus-circle"></i> New
+    </a>
 </p>
+
+
+<div class="container mt-4">
+    <form method="get">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="Id" class="col-form-label">Id</label>
+                <input type="text" class="form-control" id="Id" name="filters[0].Value" />
+                <input type="hidden" name="filters[0].PropertyName" value="Id" />
+                <input type="hidden" name="filters[0].Operation" value="Equals" />
+            </div>
+
+            <div class="col-auto">
+                <label for="DocDate" class="col-form-label">Doc Date</label>
+                <input type="date" class="form-control" id="DocDate" name="filters[1].Value" />
+                <input type="hidden" name="filters[1].PropertyName" value="DocDate" />
+                <input type="hidden" name="filters[1].Operation" value="Equals" />
+            </div>
+
+            <div class="col-auto">
+                <label for="StakeholderId" class="col-form-label">Stakeholder Id</label>
+                <input type="text" class="form-control" id="StakeholderId" name="filters[2].Value" />
+                <input type="hidden" name="filters[2].PropertyName" value="StakeholderId" />
+                <input type="hidden" name="filters[2].Operation" value="Equals" />
+            </div>
+
+            <div class="col-auto align-self-end">
+                <button type="submit" class="btn btn-primary">Apply Filter</button>
+            </div>
+        </div>
+    </form>
+
+
+
+
+    <div class="mt-3" id="appliedFilters">
+        <!-- Applied filters will appear here as badges -->
+    </div>
+</div>
+
+
+<div class="container mt-4">
+    <div class="mt-3" id="appliedFilters">
+        <!-- Applied filters will appear here as badges -->
+    </div>
+</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -44,7 +93,7 @@
                 @Html.DisplayNameFor(model => model.First().PaymentReconciliationStatus)
             </th>
 
-          
+
 
             <th></th>
         </tr>
@@ -62,7 +111,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.DocDate)
                 </td>
-                
+
                 <td>
                     @Html.DisplayFor(modelItem => item.DueDate)
                 </td>
@@ -82,7 +131,7 @@
                     @Html.DisplayFor(modelItem => statusDisplayName)
                 </td>
 
-              
+
 
                 <td>
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
@@ -90,7 +139,7 @@
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>  |
                     <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
                 </td>
-               
+
             </tr>
         }
     </tbody>
@@ -140,3 +189,61 @@
         }
     </ul>
 </nav>
+
+@section Scripts {
+    <script>
+
+        //Refill value after posting
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Populate the Id field with the corresponding query string value
+            if (urlParams.has("filters[0].Value")) {
+                document.getElementById("Id").value = urlParams.get("filters[0].Value");
+            }
+
+            if (urlParams.has("filters[1].Value")) {
+                document.getElementById("DocDate").value = urlParams.get("filters[1].Value");
+            }
+            if (urlParams.has("filters[2].Value")) {
+                document.getElementById("StakeholderId").value = urlParams.get("filters[2].Value");
+            }
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appliedFiltersDiv = document.getElementById("appliedFilters");
+
+            const filterGroups = {};
+
+            // Group parameters by their index
+            urlParams.forEach((value, key) => {
+                const match = key.match(/filters\[(\d+)\]\.(\w+)/);
+                if (match) {
+                    const index = match[1];
+                    const property = match[2];
+
+                    if (!filterGroups[index]) {
+                        filterGroups[index] = {};
+                    }
+                    filterGroups[index][property] = value;
+                }
+            });
+
+            // Create badges for each group
+            Object.keys(filterGroups).forEach(index => {
+                const filter = filterGroups[index];
+                if (filter.PropertyName && filter.Operation && filter.Value) {
+                    const badge = document.createElement("span");
+                    badge.className = "badge bg-info me-2";
+                    badge.innerText = `${filter.PropertyName} ${filter.Operation} ${filter.Value}`;
+                    appliedFiltersDiv.appendChild(badge);
+                }
+            });
+        });
+
+
+
+    </script>
+}

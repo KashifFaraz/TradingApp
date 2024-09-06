@@ -4,7 +4,7 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Invoice</h1>
+<h5>Invoice</h5>
 <hr />
 <div class="row">
     <div class="col-md-12">
@@ -197,7 +197,7 @@
 
             var unitPriceInputElement = document.querySelector('input[name="InvoiceLines[' + index + '].UnitPrice"]');
             if (unitPriceInputElement) {
-                unitPriceInputElement.value = unitPrice;
+                unitPriceInputElement.value = unitPrice;// formatNumberWithCommas((parseFloat(unitPrice) || 0).toFixed(2)); // make problem in calculation
             }
             calculateAmount(index);
         }
@@ -369,8 +369,8 @@
         function calculateAmount(index) {
             var unitPrice = parseFloat(document.getElementsByName(`InvoiceLines[${index}].UnitPrice`)[0].value) || 0;
             var quantity = parseFloat(document.getElementsByName(`InvoiceLines[${index}].Quantity`)[0].value) || 0;
-            var amount = unitPrice * quantity;
-            document.getElementsByName(`InvoiceLines[${index}].Amount`)[0].value = amount.toFixed(2);
+            var amount =  unitPrice * quantity;
+            document.getElementsByName(`InvoiceLines[${index}].Amount`)[0].value = amount.toFixed(2); //formatNumberWithCommas((parseFloat(amount) || 0).toFixed(2)); // make problem in calculation
             calculateGrandTotal();
         }
 

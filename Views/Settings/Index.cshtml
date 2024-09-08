@@ -1,87 +1,4 @@
-﻿@* <div class="row">
-    <!-- Main Sidebar -->
-    <div class="col-md-3">
-        <div class="list-group">
-            <a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="list">
-                Profile
-            </a>
-            <a href="#general" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                General
-            </a>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="col-md-9">
-        <div class="tab-content">
-            <!-- Profile Section -->
-            <div class="tab-pane fade show active" id="profile">
-                <h5>Profile Settings</h5>
-                <form>
-                    <!-- Profile Form Content -->
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" placeholder="Enter your username">
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
-                    </div>
-                    <div class="mb-3">
-                        <label for="bio" class="form-label">Bio</label>
-                        <textarea class="form-control" id="bio" rows="3" placeholder="Tell us something about yourself"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </form>
-            </div>
-
-            <!-- General Section -->
-            <div class="tab-pane fade" id="general">
-                <div class="row">
-                    <!-- Nested Sidebar -->
-                    <div class="col-md-3">
-                        <div class="list-group">
-                            <a id="MeasurementUnitLink" href="#aMeasurementUnits" class="list-group-item list-group-item-action active" data-bs-toggle="list">
-                                Measurement Units
-                            </a>
-                            <a href="#aProdutCategory" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                                Product Category
-                            </a>
-                            <a href="#aProductBrand" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                                Product Brand
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Nested Content -->
-                    <div class="col-md-9">
-                        <div class="tab-content">
-                            <!-- Measurement Unit -->
-                            <div class="tab-pane fade show active" id="aMeasurementUnits">
-                                <h5>Measurement Units</h5>
-                                <div id="MeasurementUnitDiv" class="tabData"></div>
-                            </div>
-
-                            <!-- Product Category -->
-                            <div class="tab-pane fade" id="aProdutCategory">
-                                <h5>Product Category</h5>
-                                <div id="ProdutCategoryDiv" class="tabData"></div>
-                            </div>
-
-                            <!-- Product Brand -->
-                            <div class="tab-pane fade" id="aProductBrand">
-                                <h5>Product Brand</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> *@
-
-
-<div class="row">
+﻿<div class="row">
     <div class="col-md-3">
         <div class="d-flex flex-column p-3 bg-light">
             <h4 class="mb-3">Settings</h4>
@@ -112,6 +29,18 @@
                         <li class="nav-item">
                             <a href="" id="aProductBrand" class="nav-link general-item" data-bs-toggle="tab">
                                 <i class="bi bi-briefcase"></i> Product Brand
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <div class="nav-link" id="InvoiceLink" role="button">
+                        <i class="bi bi-gear"></i> Invoice
+                    </div>
+                    <ul class="nav flex-column ms-3 mt-1 collapse" id="generalMenu">
+                        <li class="nav-item">
+                            <a href="" id="aTaxes" class="nav-link general-item" data-bs-toggle="tab">
+                                <i class="bi bi-rulers"></i> Taxes
                             </a>
                         </li>
                     </ul>
@@ -178,10 +107,6 @@
 
 
 <script>
-
-
-
-
     $(document).ready(function () {
 
         $('#aMeasurementUnits').click(function (e) {
@@ -196,6 +121,21 @@
             $('.tabData').html('');
 
             $.get('/ProductCategories/Index')
+                .done(function (data) {
+                    $('#SettingContent').html(data);
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    console.error("Request failed: " + textStatus + ", " + errorThrown);
+                    $('#SettingContent').html('<p>Error loading content. Please try again later.</p>');
+                });
+        });
+
+        //Taxes Page
+        $('#aTaxes').click(function (e) {
+            e.preventDefault();
+            $('.tabData').html('');
+
+            $.get('/Taxes/Index')
                 .done(function (data) {
                     $('#SettingContent').html(data);
                 })

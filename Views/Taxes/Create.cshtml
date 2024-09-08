@@ -1,0 +1,107 @@
+﻿@using System.Reflection;
+@using System.ComponentModel.DataAnnotations;
+@using static TradingApp.Utility.Constants;
+@model TradingApp.Models.Tax
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = null;
+    var controllerName = ViewContext.RouteData.Values["controller"].ToString();
+}
+
+
+
+<h4>Tax</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        @using (Html.BeginForm("Create", controllerName, FormMethod.Post, new { id = "form", data_controller = controllerName }))
+        {
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                 <label asp-for="ComputationType" class="control-label"></label>
+                @* <input asp-for="ComputationType" class="form-control" /> *@
+                <select name="ComputationType" class="form-control">
+                    <option value="">-- Select Item --</option>
+                    @foreach (var item in Enum.GetValues(typeof(ComputationType)).Cast<ComputationType>())
+                    {
+                        var displayName = item.GetType()
+                        .GetField(item.ToString())
+                        .GetCustomAttribute<DisplayAttribute>()?
+                        .GetName() ?? item.ToString(); // Get the Display Name or fallback to enum name
+
+                        if (Model != null && Model.ComputationType != null && item == (ComputationType)Model.ComputationType)
+                        {
+                            <option value="@((int)item)" selected>@displayName</option>
+                        }
+                        else
+                        {
+                            <option value="@((int)item)">@displayName</option>
+                        }
+                    }
+                </select>
+
+                <span asp-validation-for="ComputationType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Value" class="control-label"></label>
+                <input asp-for="Value" class="form-control" />
+                <span asp-validation-for="Value" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        }
+    </div>
+</div>
+
+<div id="resultContainer"></div>
+<div>
+    <a href="#" id="listButton" data-controller="@controllerName">Back to List</a>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#listButton').click(function (e) {
+            e.preventDefault();
+            const controllerName = $(this).data('controller');
+            $.get('/' + controllerName + '/index', function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+
+        $('#form').submit(function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function (response) {
+                    $('#resultContainer').html('<div class="alert alert-success">Record created successfully!</div>');
+                },
+                error: function (xhr, status, error) {
+                    $('#resultContainer').html('<div class="alert alert-danger">Error: ' + error + '</div>');
+                }
+            });
+        });
+    });
+</script>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

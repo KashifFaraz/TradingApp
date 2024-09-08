@@ -65,12 +65,22 @@ namespace TradingApp.Utility
         {
             Income = 0,
             Expense = 1,
-            Asset=2,
-            Liability=3,
-            Equity=4
-    }
+            Asset = 2,
+            Liability = 3,
+            Equity = 4
+        }
+        public enum ComputationType
+        {
+            [Display(Name = "Fixed Amount")]
+            FixedAmount = 0,
+            [Display(Name = "Percentage")]
+            Percentage = 1,
+
+        }
+
         public static int CurrentOrganizationId = 1;
-        public static int GetOrganizationId() {
+        public static int GetOrganizationId()
+        {
 
             return CurrentOrganizationId += 1;
 

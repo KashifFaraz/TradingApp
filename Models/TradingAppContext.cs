@@ -43,6 +43,7 @@ public partial class TradingAppContext : DbContext
     public virtual DbSet<InvoiceLine> InvoiceLines { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
+    public virtual DbSet<Tax> Taxes { get; set; }
 
     public virtual DbSet<JournalEntry> JournalEntries { get; set; }
 
@@ -286,6 +287,18 @@ public partial class TradingAppContext : DbContext
                 .HasForeignKey(d => d.SaleUnit)
                 .HasConstraintName("FK_Item_MeasureUnit");
         });
+
+        modelBuilder.Entity<Tax>(entity =>
+        {
+            entity.ToTable("Tax");
+            entity.HasKey(e => e.Id).HasName("PK_Tax");
+            entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Value).HasColumnType("decimal(18, 0)");
+        });
+
 
         modelBuilder.Entity<JournalEntry>(entity =>
         {

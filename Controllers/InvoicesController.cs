@@ -69,70 +69,49 @@ namespace TradingApp.Controllers
         // GET: TradingDocuments/Create
         public async Task<IActionResult> Create(int? id)
         {
+            if (_context.Invoices == null)
+            {
+                return NotFound();
+            }
+
+            // Define common ViewData for dropdown lists
+            PopulateInvoiceDropdowns();
+
             if (id is not null && id != 0)
             {
-                if (_context.Invoices == null)
-                {
-                    return NotFound();
-                }
                 var tradingDocument = await _context.Invoices
-                .Include(t => t.InvoiceLines)
-                .Include(t => t.PurchaseOrder)
-                .Include(t => t.Quote)
-                .Include(t => t.Rfq)
-                .Include(t => t.SalesOder)
-                .Include(t => t.Stakeholder)
-                .Include(t => t.Organization)
-                .Where(x => x.Id == id && x.IsActive == true).FirstOrDefaultAsync();
+                    .Include(t => t.InvoiceLines)
+                    .Include(t => t.PurchaseOrder)
+                    .Include(t => t.Quote)
+                    .Include(t => t.Rfq)
+                    .Include(t => t.SalesOder)
+                    .Include(t => t.Stakeholder)
+                    .Include(t => t.Organization)
+                    .FirstOrDefaultAsync(x => x.Id == id && x.IsActive == true);
 
                 if (tradingDocument == null)
                 {
                     return NotFound();
                 }
-                ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.PurchaseOrderId);
-                ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.QuoteId);
-                ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.Rfqid);
-                ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.SalesOderId);
-                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
-                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
-                //ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
-                ViewData["Item"] = _context.Items.ToList();
 
+                // Populate ViewData with trading document specific data
+                PopulateTradingDocumentDropdowns(tradingDocument);
                 return View(tradingDocument);
-
             }
-            ViewData["InvoiceId"] = new SelectList(_context.Invoices, "Id", "Id");
-            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id");
-            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id");
-            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id");
-            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id");
-            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id");
-            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name");
-            //ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
-            ViewData["Item"] = _context.Items.ToList();
 
             return View();
         }
 
-        // POST: TradingDocuments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int? id, [Bind("Id,CustomId,DocDate,StakeholderId,BankName,AccountTitle,Rfqid,DueDate,Description,QuoteId,PurchaseOrderId,SalesOderId,InvoiceId,InvoiceLines,Transaction.CustomId")] Invoice invoice)
         {
-
             if (!ModelState.IsValid)
             {
-                ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
-                ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
-                ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
-                ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
-                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
-                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
-                ViewData["Item"] = _context.Items.ToList();
-
-
+                PopulateViewData(invoice);
                 return View(invoice);
             }
 
@@ -140,173 +119,86 @@ namespace TradingApp.Controllers
             {
                 item.Amount = item.UnitPrice * item.Quantity;
             }
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Retrieve the user from the UserManager
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByIdAsync(userId);
 
             invoice.OrganizationId = user.DefaultOrganization;
             invoice.SubTotal = invoice.InvoiceLines.Sum(x => x.Amount);
-            invoice.TotalAmount = invoice.InvoiceLines.Sum(x => x.Amount);
-            invoice.UnreconciledAmount = invoice.InvoiceLines.Sum(x => x.Amount);
-
-            // Use the userId and userName as needed in your action
+            invoice.TotalAmount = invoice.SubTotal;
+            invoice.UnreconciledAmount = invoice.SubTotal;
 
             if (id is not null && id != 0)
             {
                 if (id != invoice.Id)
-                {
                     return NotFound();
+
+                var oldInvoice = await _context.Invoices.AsNoTracking()
+                    .Include(t => t.InvoiceLines)
+                    .FirstOrDefaultAsync(m => m.Id == id && m.IsActive.Value);
+
+                if (oldInvoice == null || oldInvoice.UnreconciledAmount != oldInvoice.TotalAmount)
+                {
+                    ModelState.AddModelError(string.Empty, "Invoice cannot be changed, payment already exists.");
+                    PopulateViewData(invoice);
+                    return View(invoice);
                 }
 
-                if (ModelState.IsValid)
+                invoice.CreatedBy = oldInvoice.CreatedBy;
+                invoice.CreatedOn = oldInvoice.CreatedOn;
+                invoice.EditedBy = Convert.ToInt32(userId);
+                invoice.EditedOn = DateTime.Now;
+
+                try
                 {
-
-                    var oldInvoice = await _context.Invoices.AsNoTracking()
-               .Include(t => t.InvoiceLines)
-               .ThenInclude(t => t.Item)
-               .Include(t => t.PurchaseOrder)
-               .Include(t => t.Quote)
-               .Include(t => t.Rfq)
-               .Include(t => t.SalesOder)
-               .Include(t => t.Stakeholder)
-               .Include(t => t.Organization)
-               .FirstOrDefaultAsync(m => m.Id == id && m.IsActive == true);
-
-                    if (oldInvoice == null)
-                    {
+                    _context.Update(invoice);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TradingDocumentExists(invoice.Id))
                         return NotFound();
-                    }
-
-                    if (oldInvoice.UnreconciledAmount != oldInvoice.TotalAmount)
-                    {
-
-                        ModelState.AddModelError(string.Empty, "Invoice Can not be changed, payment already exist");
-
-                        ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
-                        ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
-                        ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
-                        ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
-                        ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
-                        ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
-                        ViewData["Item"] = _context.Items.ToList();
-
-
-                        return View(invoice);
-                    }
-                    try
-                    {
-                        invoice.CreatedBy = oldInvoice.CreatedBy;
-                        invoice.CreatedOn = oldInvoice.CreatedOn;
-                        invoice.IsActive = true;
-                        invoice.EditedBy = Convert.ToInt32(userId);
-                        invoice.EditedOn = DateTime.Now;
-                        _context.Update(invoice);
-                        await _context.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!TradingDocumentExists(invoice.Id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    return RedirectToAction(nameof(Index));
+                    throw;
                 }
-                ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
-                ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
-                ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
-                ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
-                ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
-                ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
-                ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
 
-                return View(invoice);
-
-            }
-
-            if (ModelState.IsValid)
-            {
-                if (invoice.Transaction is null)
-                {
-                    invoice.Transaction = new Transaction();
-                }
-                invoice.Transaction.Type = (byte)TransectionType.Invoice;
-                invoice.PaymentReconciliationStatus = (byte)PaymentReconciliationStatus.Unreconciled;
-                _context.Add(invoice.Transaction);
-                await _context.SaveChangesAsync();
-                int transactionId = invoice.Transaction.TransactionId;
-                invoice.TransactionId = transactionId;
-                var receivableAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Accounts Receivable" && a.AccountTypeId == (int)FinanceAccountType.Asset);
-                var salesAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Sales Revenue" && a.AccountTypeId == (int)FinanceAccountType.Income);
-                var taxAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Accounts Payable" && a.AccountTypeId == (int)FinanceAccountType.Liability);
-                var discountAccount = _context.ChartOfAccounts.SingleOrDefault(a => a.Name == "Cost of Goods Sold" && a.AccountTypeId == (int)FinanceAccountType.Expense);
-
-                // Create journal entries for the invoice
-                var debitEntry = new JournalEntry
-                {
-                    TransactionType = (byte)TransectionType.Invoice,
-                    AccountId = receivableAccount.Id,
-                    TransactionId = invoice.TransactionId.Value,
-                    TransactionLineId = 0,
-                    Type = "D",
-                    Amount = invoice.TotalAmount.Value
-                };
-
-                var creditEntryForSales = new JournalEntry
-                {
-                    TransactionType = (byte)TransectionType.Invoice,
-                    AccountId = salesAccount.Id,
-                    TransactionId = invoice.TransactionId.Value,
-                    TransactionLineId = 0,
-                    Type = "C",
-                    Amount = invoice.SubTotal.Value
-                };
-                var creditEntryForTax = new JournalEntry
-                {
-                    TransactionType = (byte)TransectionType.Invoice,
-                    AccountId = taxAccount.Id,
-                    TransactionId = invoice.TransactionId.Value,
-                    TransactionLineId = 0,
-                    Type = "C",
-                    Amount = invoice.TotalAmount.Value - invoice.SubTotal.Value
-                };
-                var creditEntryForDiscount = new JournalEntry
-                {
-                    TransactionType = (byte)TransectionType.Invoice,
-                    AccountId = discountAccount.Id,
-                    TransactionId = invoice.TransactionId.Value,
-                    TransactionLineId = 0,
-                    Type = "C",
-                    Amount = 0
-                };
-
-                invoice.IsActive = true;
-                invoice.CreatedBy = Convert.ToInt32(userId);
-                invoice.CreatedOn = DateTime.Now;
-                _context.Add(invoice);
-                _context.Add(debitEntry);
-                _context.Add(creditEntryForSales);
-                _context.Add(creditEntryForTax);
-                _context.Add(creditEntryForDiscount);
-                var a = await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
-            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
-            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
-            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
-            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
-            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
-            ViewData["Item"] = new SelectList(_context.Items, "Id", "Name");
+            // Create new transaction
+            if (invoice.TransactionId == null)
+            {
+                invoice.Transaction = new Transaction
+                {
+                    Type = (byte)TransectionType.Invoice,
+                };
+            }
 
-            return View(invoice);
+            invoice.PaymentReconciliationStatus = (byte)PaymentReconciliationStatus.Unreconciled;
+            _context.Add(invoice.Transaction);
+            await _context.SaveChangesAsync();
+
+            invoice.TransactionId = invoice.Transaction.TransactionId;
+
+            var accounts = await GetChartOfAccountsAsync();
+
+            var journalEntries = CreateJournalEntries(invoice, accounts);
+            foreach (var entry in journalEntries)
+            {
+                _context.Add(entry);
+            }
+
+            invoice.IsActive = true;
+            invoice.CreatedBy = Convert.ToInt32(userId);
+            invoice.CreatedOn = DateTime.Now;
+
+            _context.Add(invoice);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
+
+        
+
 
 
 
@@ -407,6 +299,97 @@ namespace TradingApp.Controllers
             }).ToList();
             return View(viewModel);
         }
+
+        //private methods
+
+        // Helper method to populate common dropdown lists
+        private void PopulateInvoiceDropdowns()
+        {
+            ViewData["InvoiceId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id");
+            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id");
+            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name");
+            ViewData["Item"] = _context.Items.ToList(); // Could be SelectList if needed
+        }
+
+        // Helper method to populate dropdowns based on trading document
+        private void PopulateTradingDocumentDropdowns(Invoice tradingDocument)
+        {
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.PurchaseOrderId);
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.QuoteId);
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.Rfqid);
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", tradingDocument.SalesOderId);
+            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", tradingDocument.StakeholderId);
+            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", tradingDocument.Stakeholder);
+            ViewData["Item"] = _context.Items.ToList(); // Could be SelectList if needed
+        }
+
+        private async Task<Dictionary<string, ChartOfAccount>> GetChartOfAccountsAsync()
+        {
+            var accountNames = new[] { "Accounts Receivable", "Sales Revenue", "Accounts Payable", "Cost of Goods Sold" };
+            var accounts = await _context.ChartOfAccounts
+                .Where(a => accountNames.Contains(a.Name))
+                .ToDictionaryAsync(a => a.Name);
+
+            return accounts;
+        }
+
+        private IEnumerable<JournalEntry> CreateJournalEntries(Invoice invoice, Dictionary<string, ChartOfAccount> accounts)
+        {
+            return new List<JournalEntry>
+    {
+        new JournalEntry
+        {
+            TransactionType = (byte)TransectionType.Invoice,
+            AccountId = accounts["Accounts Receivable"].Id,
+            TransactionId = invoice.TransactionId.Value,
+            Type = "D",
+            Amount = invoice.TotalAmount.Value
+        },
+        new JournalEntry
+        {
+            TransactionType = (byte)TransectionType.Invoice,
+            AccountId = accounts["Sales Revenue"].Id,
+            TransactionId = invoice.TransactionId.Value,
+            Type = "C",
+            Amount = invoice.SubTotal.Value
+        },
+        new JournalEntry
+        {
+            TransactionType = (byte)TransectionType.Invoice,
+            AccountId = accounts["Accounts Payable"].Id,
+            TransactionId = invoice.TransactionId.Value,
+            Type = "C",
+            Amount = invoice.TotalAmount.Value - invoice.SubTotal.Value
+        },
+        new JournalEntry
+        {
+            TransactionType = (byte)TransectionType.Invoice,
+            AccountId = accounts["Cost of Goods Sold"].Id,
+            TransactionId = invoice.TransactionId.Value,
+            Type = "C",
+            Amount = 0 // Add discount logic if required
+        }
+    };
+        }
+
+        private void PopulateViewData(Invoice invoice)
+        {
+            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
+            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
+            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
+            ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
+            ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
+            ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
+            ViewData["Item"] = _context.Items.ToList();
+        }
+
+
+        //Repo Methods
+
         private bool TradingDocumentExists(int id)
         {
             return (_context.Invoices?.Any(e => e.Id == id)).GetValueOrDefault();

@@ -69,8 +69,6 @@ namespace TradingApp.Controllers
         {
             if (ModelState.IsValid)
             {
-               
-
                 if (id is not null && id != 0)
                 {
                     //Update

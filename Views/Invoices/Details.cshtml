@@ -196,7 +196,7 @@
         <div class="col text-end">
             <h4>
                 <label asp-for="SubTotal" class="control-label"></label>
-                @Html.DisplayFor(modelItem => modelItem.SubTotal)
+                @Html.DisplayFor(modelItem => modelItem.SubTotal)  @Html.DisplayFor(modelItem => modelItem.Currency)
             </h4>
         </div>
     </div>
@@ -204,7 +204,7 @@
         <div class="col text-end">
             <h4>
                 <label asp-for="TotalAmount" class="control-label"></label>
-                @Html.DisplayFor(modelItem => modelItem.TotalAmount)
+                @Html.DisplayFor(modelItem => modelItem.TotalAmount) @Html.DisplayFor(modelItem => modelItem.Currency)
             </h4>
         </div>
     </div>

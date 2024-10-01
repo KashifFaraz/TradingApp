@@ -8,14 +8,17 @@ using TradingApp.Utility;
 namespace TradingApp.Models
 {
     [ModelMetadataType(typeof(TransectionMetadata))]
-    public partial class Invoice 
+    public partial class Invoice: AuditableEntity
     {
         //public Constants.PaymentType PaymentType { get; set; }
         //[NotMapped]
         // public string? CustomId { get; set; }
-        
+
         [NotMapped]
         public decimal TotalPaid { get; set; }
+        [NotMapped]
+        public byte? DocStatusInput { get; set; }
+
     }
 
 
@@ -76,6 +79,10 @@ namespace TradingApp.Models
         [Display(Name = "Payment Status")]
         public byte? PaymentReconciliationStatus { get; set; }
 
+        [Display(Name = "Status")]
+        public byte? DocStatus { get; set; }
+
+
         [JsonIgnore]
         public virtual ICollection<Invoice> InverseInvoice { get; set; } = new List<Invoice>();
 
@@ -95,7 +102,7 @@ namespace TradingApp.Models
         public virtual ICollection<InvoiceLine> TransectionLines { get; set; } = new List<InvoiceLine>();
         [Display(Name = "Customer")]
         public virtual Stakeholder? Stakeholder { get; set; }
-        
+
 
 
 

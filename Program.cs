@@ -6,12 +6,19 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Text.Json.Serialization;
+using TradingApp.AutoMapper;
 using TradingApp.Data;
 using TradingApp.Filter;
 using TradingApp.Models;
 using TradingApp.Models.Config;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Register AutoMapper with the mapping profiles
+builder.Services.AddAutoMapper(typeof(MappingProfile));  // Register AutoMapper with your profile
+
+
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

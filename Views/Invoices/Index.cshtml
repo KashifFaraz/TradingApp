@@ -94,7 +94,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.First().PaymentReconciliationStatus)
             </th>
-
+            <th>
+                @Html.DisplayNameFor(model => model.First().DocStatus)
+            </th>
 
 
             <th></th>
@@ -121,10 +123,10 @@
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.SubTotal)
+                    @Html.DisplayFor(modelItem => item.SubTotal) @Html.DisplayFor(modelItem => item.Currency)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.TotalAmount)
+                    @Html.DisplayFor(modelItem => item.TotalAmount) @Html.DisplayFor(modelItem => item.Currency)
                 </td>
                 <td>
                     @{
@@ -133,13 +135,22 @@
                     @Html.DisplayFor(modelItem => statusDisplayName)
                 </td>
 
-
+                <td>
+                    @{
+                        var statusDocDisplayName = EnumExtensions.GetEnumDisplayName<DocumentStatus>(item.DocStatus);
+                    }
+                    @Html.DisplayFor(modelItem => statusDocDisplayName)
+                </td>
 
                 <td>
                     <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>  |
-                    <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>
+                    @if (item.DocStatus == (byte)DocumentStatus.Finalized)
+                    {
+                        <text>|</text> <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
+                    }
+
                 </td>
 
             </tr>

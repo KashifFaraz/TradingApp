@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using TradingApp.Models.Config;
@@ -10,7 +11,7 @@ namespace TradingApp.Models;
 public partial class TradingAppContext : DbContext
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-   
+
     public TradingAppContext()
     {
     }
@@ -453,5 +454,57 @@ public partial class TradingAppContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-  
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is AuditableEntity &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+        var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        foreach (var entry in entries)
+        {
+            var auditableEntity = (AuditableEntity)entry.Entity;
+
+            if (entry.State == EntityState.Added)
+            {
+                auditableEntity.CreatedBy = Convert.ToInt32(userId);
+                auditableEntity.CreatedOn = DateTime.Now;
+                auditableEntity.IsActive = true;
+            }
+
+            auditableEntity.EditedBy = Convert.ToInt32(userId);
+            auditableEntity.EditedOn = DateTime.Now;
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        var entries = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is AuditableEntity &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+        var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        foreach (var entry in entries)
+        {
+            var auditableEntity = (AuditableEntity)entry.Entity;
+
+            if (entry.State == EntityState.Added)
+            {
+                auditableEntity.CreatedBy = Convert.ToInt32(userId);
+                auditableEntity.CreatedOn = DateTime.Now;
+                auditableEntity.IsActive = true;
+            }
+
+            auditableEntity.EditedBy = Convert.ToInt32(userId);
+            auditableEntity.EditedOn = DateTime.Now;
+        }
+
+        return base.SaveChanges();
+    }
 }

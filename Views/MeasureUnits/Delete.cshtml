@@ -30,7 +30,7 @@
 </div>
 <div id="resultContainer"></div>
 <div>
-    <a href="#" id="listMeasurementUnit">Back to List</a>
+    <a href="#" id="backtoListButton">Back to List</a>
 </div>
 <script>
 
@@ -38,7 +38,7 @@
 
     $(document).ready(function () {
 
-        $('#listMeasurementUnit').click(function (e) {
+        $('#backtoListButton').click(function (e) {
             e.preventDefault(); // Prevent the default anchor behavior
 
             $.get('/MeasureUnits/index', function (data) {

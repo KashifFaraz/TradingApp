@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TradingApp.Models;
 
-public partial class Invoice
+public partial class Invoice: AuditableEntity
 {
     public int Id { get; set; }
 
@@ -44,18 +44,20 @@ public partial class Invoice
     public decimal? UnreconciledAmount { get; set; }
 
     public byte? PaymentReconciliationStatus { get; set; }
+    public byte? DocStatus { get; set; }
+    
 
     public int? OrganizationId { get; set; }
 
-    public bool? IsActive { get; set; }
+    //public bool? IsActive { get; set; }
 
-    public int? CreatedBy { get; set; }
+    //public int? CreatedBy { get; set; }
 
-    public DateTime? CreatedOn { get; set; }
+    //public DateTime? CreatedOn { get; set; }
 
-    public int? EditedBy { get; set; }
+    //public int? EditedBy { get; set; }
 
-    public DateTime? EditedOn { get; set; }
+    //public DateTime? EditedOn { get; set; }
 
     public virtual AppUser? CreatedByNavigation { get; set; }
 

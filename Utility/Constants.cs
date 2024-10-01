@@ -38,6 +38,23 @@ namespace TradingApp.Utility
             [Display(Name = "Reconciled")]
             Reconciled = 2
         }
+
+        public enum DocumentStatus : byte
+        {
+            [Display(Name = "Draft")]
+            Draft = 0,
+
+            [Display(Name = "Finalized")]
+            Finalized = 1,
+
+            [Display(Name = "Partial Reconciled")]
+            FinalizedPartialReconciled = 2,
+
+            [Display(Name = "Reconciled")]
+            FinalizedReconciled = 3,
+
+        }
+
         public enum PaymentMethod
         {
 

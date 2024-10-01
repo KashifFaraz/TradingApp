@@ -1,69 +1,91 @@
-﻿@model TradingApp.Models.Tax
+﻿@using TradingApp.Utility;
+@using static TradingApp.Utility.Constants;
+@model TradingApp.Models.Tax
 
 @{
     ViewData["Title"] = "Delete";
+    Layout = null;
 }
 
-<h1>Delete</h1>
-
-<h3>Are you sure you want to delete this?</h3>
+<h3>Tax</h3>
+<h5>Are you sure you want to delete this?</h5>
 <div>
-    <h4>Tax</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Description)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.ComputationType)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ComputationType)
+        <dd class="col-sm-10">
+           
+                @{
+                var statusDisplayName = EnumExtensions.GetEnumDisplayName<ComputationType>(Model.ComputationType);
+                }
+                @Html.DisplayFor(modelItem => statusDisplayName)
+           
+            @* @Html.DisplayFor(model => model.ComputationType) *@
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Value)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Value)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedOn)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedOn)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EditedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EditedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EditedOn)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EditedOn)
-        </dd>
     </dl>
-    
-    <form asp-action="Delete">
+    @using (Html.BeginForm("Delete", "Taxes", FormMethod.Post, new { id = "createForm" }))
+    {
+
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+        <input type="submit" value="Delete" class="btn btn-danger" />
+    }
+
 </div>
+<div id="resultContainer"></div>
+<div>
+    <a href="#" id="backtoListButton">Back to List</a>
+</div>
+
+<script>
+
+
+
+    $(document).ready(function () {
+
+        $('#backtoListButton').click(function (e) {
+            e.preventDefault(); // Prevent the default anchor behavior
+
+            $.get('/Taxes/index', function (data) {
+                $('#SettingContent').html(data);
+            });
+        });
+
+        $('#createForm').submit(function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            $.ajax({
+                type: "POST",
+                url: $(this).attr('action'),
+                data: $(this).serialize(), // Serialize the form data
+                success: function (response) {
+                    // Handle the response (e.g., show a success message, clear the form, etc.)
+                    $('#resultContainer').html('<div class="alert alert-success">Record created successfully!</div>');
+                },
+                error: function (xhr, status, error) {
+                    // Handle any errors
+                    $('#resultContainer').html('<div class="alert alert-danger">Error: ' + error + '</div>');
+                }
+            });
+        });
+    });
+</script>

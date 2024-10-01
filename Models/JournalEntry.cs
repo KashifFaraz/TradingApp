@@ -19,6 +19,8 @@ public partial class JournalEntry
 
     public decimal Amount { get; set; }
 
+    public bool? IsActive { get; set; }
+
     public int? CreatedBy { get; set; }
 
     public DateTime? CreatedOn { get; set; }

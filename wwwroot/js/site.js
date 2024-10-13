@@ -116,3 +116,20 @@ document.querySelectorAll('.toggle-column').forEach(checkbox => {
 
 //Table
 
+
+
+//Table Page Change
+
+function changePageSize(selectElement) {
+    const pageSize = selectElement.value;
+    const currentUrl = new URL(window.location.href);
+
+    // Set the 'pageSize' query parameter
+    currentUrl.searchParams.set('pageSize', pageSize);
+    currentUrl.searchParams.set('pageNumber', 1); // Reset to first page
+
+    // Redirect to the new URL
+    window.location.href = currentUrl;
+}
+
+//Table Page Change

@@ -28,10 +28,12 @@ namespace TradingApp.Filter
                 var filterProperty = query[$"filters[{index}].PropertyName"].ToString();
                 var filterOperation = query[$"filters[{index}].Operation"].ToString();
                 var filterValue = query[$"filters[{index}].Value"].ToString();
+                var filterDisplay = query[$"filters[{index}].DisplayText"].ToString();
 
                 paginationFilter.filters.Add(new FilterCriteria
                 {
                     PropertyName = filterProperty,
+                    DisplayText = filterDisplay,
                     Operation = filterOperation,
                     Value = filterValue
                 });

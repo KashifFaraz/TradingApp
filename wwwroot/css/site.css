@@ -26,7 +26,6 @@ body {
 
 table.resizable-table th {
     position: relative;
-    cursor: col-resize;
 }
 
     table.resizable-table th::after {
@@ -35,8 +34,7 @@ table.resizable-table th {
         right: 0;
         top: 0;
         height: 100%;
-        width: 5px;
-        background: #ccc;
+        width: 3px;
         cursor: col-resize;
     }
 
@@ -57,10 +55,11 @@ table.resizable-table th {
 
 
 .table thead th {
-    position: sticky; /* Make the header sticky */
-    top: 0; /* Set top position */
-    z-index: 10; /* Ensure it stays above the table content */
-    background: #f8f9fa; /* Match the Bootstrap header color */
+    position: sticky;
+    top: 0; 
+    z-index: 60;
+    background: #f8f9fa;
+   
 }
 
 /* Optional: Add a shadow for better visibility */
@@ -69,3 +68,17 @@ table.resizable-table th {
 }
 
 /*table header fix*/
+
+
+/*Fix Action Button Header*/
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 50; /* Ensure it stays above other elements */
+    background-color: white; /* Matches the background */
+    padding: 10px;
+    margin: -16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for visual separation */
+}
+/*Fix Action Button Header*/
+

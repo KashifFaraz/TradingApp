@@ -3,24 +3,22 @@
 @using TradingApp.ViewModels;
 @using static TradingApp.Utility.Constants;
 @model PaginatedList<TradingApp.Models.Invoice>
-
-
 @{
     ViewData["Title"] = "Invoice";
-
 }
+<div class="sticky-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Left aligned heading -->
+        <h5 class="mb-0">Invoice</h5>
 
-<h1>Invoice List</h1>
-
-<p>
-    <a class="btn btn-primary btn-lg shadow-sm" asp-action="Create" asp-route-id="0">
-        <i class="fas fa-plus-circle"></i> New
-    </a>
-</p>
-
-
-
-
+        <!-- Right aligned buttons -->
+        <div class="d-flex">
+            <a class="btn btn-primary shadow-sm  me-2" asp-action="Create" asp-route-id="0">
+                <i class="fas fa-plus-circle"></i> New
+            </a>
+        </div>
+    </div>
+</div>
 <div class="container mt-4">
     <form method="get">
         <div class="row g-3 align-items-center">
@@ -38,11 +36,33 @@
                 <input type="hidden" name="filters[1].Operation" value="Equals" />
             </div>
 
-            <div class="col-auto">
+            @* <div class="col-auto">
+            <label for="StakeholderId" class="col-form-label">Stakeholder Id</label>
+            <input type="text" class="form-control" id="StakeholderId" name="filters[2].Value" />
+            <input type="hidden" name="filters[2].PropertyName" value="StakeholderId" />
+            <input type="hidden" name="filters[2].Operation" value="Equals" />
+            </div> *@
+            <div class="col-auto position-relative">
                 <label for="StakeholderId" class="col-form-label">Stakeholder Id</label>
-                <input type="text" class="form-control" id="StakeholderId" name="filters[2].Value" />
+
+
+                <!-- Search input -->
+                @* <input type="text" class="form-control" id="StakeholderName" name="filters[2].DisplayText"
+                       autocomplete="off"
+                       placeholder="Search Customer..." onkeyup="searchStakeholder(this.value)" /> *@
+
+                <input type="text" id="StakeholderName" name="filters[2].DisplayText"
+                       placeholder="Search Customer..." autocomplete="off" class="form-control">
+
+
+                <!-- Hidden fields to maintain filter values -->
                 <input type="hidden" name="filters[2].PropertyName" value="StakeholderId" />
                 <input type="hidden" name="filters[2].Operation" value="Equals" />
+                <input type="hidden" name="filters[2].Value" id="StakeholderId" />
+
+
+                <!-- Search results dropdown -->
+                <div class="dropdown-menu w-100" id="stakeholderDropdown"></div>
             </div>
 
             <div class="col-auto align-self-end">
@@ -70,227 +90,248 @@
 
 
 
-    <table id="invoiceTable" class="table resizable-table ShowHideColumnTable table-bordered rounded">
-        <thead class="bg-light">
+<table id="invoiceTable" class="table resizable-table ShowHideColumnTable table-bordered rounded table-sm">
+    <thead class="bg-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StakeholderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().DocDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().DueDate)
+
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().SubTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().TotalAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().PaymentReconciliationStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().DocStatus)
+            </th>
+
+
+
+
+            <th class="text-end">
+                <div class="dropdown mb-3">
+                    <button class="btn" type="button" id="columnVisibilityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu p-3 m-2" aria-labelledby="columnVisibilityDropdown">
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnId" data-column="0" checked />
+                                <label class="form-check-label" for="columnId">ID</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnStakeholder" data-column="1" checked />
+                                <label class="form-check-label" for="columnStakeholder">Stakeholder</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnDocDate" data-column="2" checked />
+                                <label class="form-check-label" for="columnDocDate">DocDate</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnDueDate" data-column="3" checked />
+                                <label class="form-check-label" for="columnDueDate">DueDate</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnDescription" data-column="4" checked />
+                                <label class="form-check-label" for="columnDescription">Description</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnSubTotal" data-column="5" checked />
+                                <label class="form-check-label" for="columnSubTotal">SubTotal</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnTotalAmount" data-column="6" checked />
+                                <label class="form-check-label" for="columnTotalAmount">TotalAmount</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnPaymentStatus" data-column="7" checked />
+                                <label class="form-check-label" for="columnPaymentStatus">Payment Reconciliation Status</label>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input toggle-column" id="columnDocStatus" data-column="8" checked />
+                                <label class="form-check-label" for="columnDocStatus">DocStatus</label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().Id)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().StakeholderId)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().DocDate)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().DueDate)
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Stakeholder.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DocDate)
+                </td>
 
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().Description)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().SubTotal)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().TotalAmount)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().PaymentReconciliationStatus)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.First().DocStatus)
-                </th>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DueDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SubTotal) @Html.DisplayFor(modelItem => item.Currency)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TotalAmount) @Html.DisplayFor(modelItem => item.Currency)
+                </td>
+                <td>
+                    @{
+                        var statusDisplayName = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(item.PaymentReconciliationStatus);
+                    }
+                    @Html.DisplayFor(modelItem => statusDisplayName)
+                </td>
 
+                <td>
+                    @{
+                        var statusDocDisplayName = EnumExtensions.GetEnumDisplayName<DocumentStatus>(item.DocStatus);
+                    }
+                    @Html.DisplayFor(modelItem => statusDocDisplayName)
+                </td>
 
-
-
-                <th class="text-end">
-                    <div class="dropdown mb-3">
-                        <button class="btn" type="button" id="columnVisibilityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <ul class="dropdown-menu p-3 m-2" aria-labelledby="columnVisibilityDropdown">
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnId" data-column="0" checked />
-                                    <label class="form-check-label" for="columnId">ID</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnStakeholder" data-column="1" checked />
-                                    <label class="form-check-label" for="columnStakeholder">Stakeholder</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnDocDate" data-column="2" checked />
-                                    <label class="form-check-label" for="columnDocDate">DocDate</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnDueDate" data-column="3" checked />
-                                    <label class="form-check-label" for="columnDueDate">DueDate</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnDescription" data-column="4" checked />
-                                    <label class="form-check-label" for="columnDescription">Description</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnSubTotal" data-column="5" checked />
-                                    <label class="form-check-label" for="columnSubTotal">SubTotal</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnTotalAmount" data-column="6" checked />
-                                    <label class="form-check-label" for="columnTotalAmount">TotalAmount</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnPaymentStatus" data-column="7" checked />
-                                    <label class="form-check-label" for="columnPaymentStatus">Payment Reconciliation Status</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input toggle-column" id="columnDocStatus" data-column="8" checked />
-                                    <label class="form-check-label" for="columnDocStatus">DocStatus</label>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+                @*  <td colspan="2">
+            <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
+            <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
+            <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>
+            @if (item.DocStatus == (byte)DocumentStatus.Finalized)
             {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Id)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Stakeholder.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DocDate)
-                    </td>
-
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DueDate)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Description)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.SubTotal) @Html.DisplayFor(modelItem => item.Currency)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TotalAmount) @Html.DisplayFor(modelItem => item.Currency)
-                    </td>
-                    <td>
-                        @{
-                            var statusDisplayName = EnumExtensions.GetEnumDisplayName<PaymentReconciliationStatus>(item.PaymentReconciliationStatus);
-                        }
-                        @Html.DisplayFor(modelItem => statusDisplayName)
-                    </td>
-
-                    <td>
-                        @{
-                            var statusDocDisplayName = EnumExtensions.GetEnumDisplayName<DocumentStatus>(item.DocStatus);
-                        }
-                        @Html.DisplayFor(modelItem => statusDocDisplayName)
-                    </td>
-
-                    @*  <td colspan="2">
-                <a asp-action="Create" asp-route-id="@item.Id">Edit ✐ </a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details 🖹</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete ❌</a>
-                @if (item.DocStatus == (byte)DocumentStatus.Finalized)
-                {
-                <text>|</text> <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
-                }
-
-                </td> *@
-                    <td>
-                        <div class="btn-group" role="group">
-                            <a asp-action="Create" asp-route-id="@item.Id" class="btn  btn-primary" title="Edit">
-                                <i class="bi bi-pencil-fill"></i> Edit
-                            </a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info" title="Details">
-                                <i class="bi bi-info-circle-fill"></i> Details
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn  btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
-                                <i class="bi bi-trash-fill"></i> Delete
-                            </a>
-                            @if (item.DocStatus == (byte)DocumentStatus.Finalized)
-                            {
-                                <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id" class="btn  btn-success" title="Create Receipt">
-                                    <i class="bi bi-cash"></i> Receipt
-                                </a>
-                            }
-                        </div>
-                    </td>
-
-                </tr>
+            <text>|</text> <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id">Receipt 💰</a>
             }
-        </tbody>
-    </table>
 
-<nav aria-label="Page navigation">
-    <ul class="pagination">
-        @if (Model.HasPreviousPage)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)">Previous</a>
-            </li>
-        }
-        else
-        {
-            <li class="page-item disabled">
-                <span class="page-link">Previous</span>
-            </li>
-        }
+            </td> *@
+                <td>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Create" asp-route-id="@item.Id" class="btn  btn-primary" title="Edit">
+                            <i class="bi bi-pencil-fill"></i> Edit
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info" title="Details">
+                            <i class="bi bi-info-circle-fill"></i> Details
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn  btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </a>
+                        @if (item.DocStatus == (byte)DocumentStatus.Finalized)
+                        {
+                            <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id" class="btn  btn-success" title="Create Receipt">
+                                <i class="bi bi-cash"></i> Receipt
+                            </a>
+                        }
+                    </div>
+                </td>
 
-        @for (int i = 1; i <= Model.TotalPages; i++)
-        {
-            if (i == Model.PageIndex)
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <!-- Page Size Dropdown -->
+        <label for="pageSizeSelect" class="me-2">Page Size:</label>
+        <select id="pageSizeSelect" class="form-select d-inline-block" style="width: auto;"
+                onchange="changePageSize(this)">
+            @foreach (var size in new[] { 10, 25, 50, 100 })
             {
-                <li class="page-item active">
-                    <span class="page-link">@i</span>
+                <option value="@size" selected="@(Model.PageSize == size)">@size</option>
+            }
+        </select>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-pageSize="@Model.PageSize">Previous</a>
                 </li>
             }
             else
             {
-                <li class="page-item">
-                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
                 </li>
             }
-        }
 
-        @if (Model.HasNextPage)
-        {
-            <li class="page-item">
-                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)">Next</a>
-            </li>
-        }
-        else
-        {
-            <li class="page-item disabled">
-                <span class="page-link">Next</span>
-            </li>
-        }
-    </ul>
-</nav>
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                if (i == Model.PageIndex)
+                {
+                    <li class="page-item active">
+                        <span class="page-link">@i</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-pageNumber="@i"
+                           asp-route-pageSize="@Model.PageSize">@i</a>
+                    </li>
+                }
+            }
+
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-pageSize="@Model.PageSize">Next</a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
 
 @section Scripts {
     <script>
@@ -309,6 +350,9 @@
             }
             if (urlParams.has("filters[2].Value")) {
                 document.getElementById("StakeholderId").value = urlParams.get("filters[2].Value");
+            }
+            if (urlParams.has("filters[2].DisplayText")) {
+                document.getElementById("StakeholderName").value = urlParams.get("filters[2].DisplayText");
             }
         });
 
@@ -339,11 +383,46 @@
                 if (filter.PropertyName && filter.Operation && filter.Value) {
                     const badge = document.createElement("span");
                     badge.className = "badge bg-info me-2";
-                    badge.innerText = `${filter.PropertyName} ${filter.Operation} ${filter.Value}`;
+                    badge.innerText = `${filter.PropertyName} ${filter.Operation} ${filter.DisplayText ?? filter.Value
+                } `;
                     appliedFiltersDiv.appendChild(badge);
                 }
             });
         });
+
+        $(function () {
+            $("#StakeholderName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Stakeholders/Search",
+                        type: "GET",
+                        data: { searchTerm: request.term },
+                        success: function (data) {
+                            response($.map(data.$values, function (item) {
+                                return {
+                                    label: item.name,
+                                    value: item.id
+                                };
+                            }));
+                        }
+                    });
+                },
+                minLength: 2, // Minimum characters before searching
+                delay: 300,   // Delay in milliseconds
+                focus: function (event, ui) {
+                    $('#StakeholderName').val(ui.item.label);
+                    return false;
+                },
+                select: function (event, ui) {
+                    $('#StakeholderName').val(ui.item.label);
+                    $('input[name="filters[2].Value"]').val(ui.item.value);
+                    return false;
+                },
+               
+            });
+        });
+
+
 
 
 

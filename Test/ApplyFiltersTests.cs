@@ -35,6 +35,7 @@ namespace TradingApp.Tests;
                     {
                         PropertyName = "DocDate",
                         Operation = "Equals",
+                        DisplayText="",
                         Value = new DateTime(2024, 9, 27).ToString("yyyy-MM-dd")
                     }
                 }
@@ -66,7 +67,7 @@ namespace TradingApp.Tests;
                     new FilterCriteria
                     {
                         PropertyName = "DocDate",
-                        Operation = "Equals",
+                        Operation = "Equals",   DisplayText="",
                         Value = new DateTime(2024, 9, 27).ToString("yyyy-MM-dd")
                     }
                 }
@@ -121,7 +122,7 @@ namespace TradingApp.Tests;
                     new FilterCriteria
                     {
                         PropertyName = "DocDate",
-                        Operation = "Equals",
+                        Operation = "Equals",   DisplayText="",
                         Value = ""
                     }
                 }

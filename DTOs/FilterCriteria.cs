@@ -5,6 +5,7 @@
         public required string PropertyName { get; set; }
         public required string Operation { get; set; }
         public required object Value { get; set; }
+        public required string DisplayText { get; set; }
 
         public object GetTypedValue(Type targetType)
         {

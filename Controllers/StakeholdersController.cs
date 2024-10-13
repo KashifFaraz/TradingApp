@@ -175,6 +175,18 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public IActionResult Search(string searchTerm)
+        {
+            var stakeholders = _context.Stakeholders
+                .Where(s => s.Name.Contains(searchTerm))
+                .Select(s => new { s.Id, s.Name })
+                .Take(10) // Limit results for performance
+                .ToList();
+
+            return Json(stakeholders);
+        }
+
         private bool StakeholderExists(int id)
         {
           return (_context.Stakeholders?.Any(e => e.Id == id)).GetValueOrDefault();

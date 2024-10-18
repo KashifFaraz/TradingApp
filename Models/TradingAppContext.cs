@@ -85,7 +85,24 @@ public partial class TradingAppContext : DbContext
             }
         }
 
+        // Automatically apply configurations for all entities inheriting from BaseEntity
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+            .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType) && !e.ClrType.IsAbstract))
+        {
+            var entity = modelBuilder.Entity(entityType.ClrType);
 
+            // Configure common properties for BaseEntity
+            entity.HasKey(nameof(BaseEntity.Id)).HasName($"PK_{entityType.ClrType.Name}");
+
+            entity.Property(nameof(BaseEntity.CreatedOn))
+                .HasColumnType("datetime");
+
+            entity.Property(nameof(BaseEntity.EditedOn))
+                .HasColumnType("datetime");
+
+            entity.Property(nameof(BaseEntity.IsActive))
+                .HasDefaultValueSql("((1))");
+        }
 
         modelBuilder.Entity<AccountType>(entity =>
         {
@@ -186,7 +203,7 @@ public partial class TradingAppContext : DbContext
 
         modelBuilder.Entity<Invoice>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_TradingDocument");
+            
 
             entity.ToTable("Invoice");
 
@@ -248,14 +265,16 @@ public partial class TradingAppContext : DbContext
 
         modelBuilder.Entity<InvoiceLine>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_TradingDocumentDetails");
+            //entity.HasKey(e => e.Id).HasName("PK_TradingDocumentDetails");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.CraetedOn).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.EditedOn).HasColumnType("datetime");
-            entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
+            //entity.Property(e => e.CreatedOn).HasColumnType("datetime");
+            //entity.Property(e => e.EditedOn).HasColumnType("datetime");
+            //entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
+
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DiscountPercentage).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Item).WithMany(p => p.InvoiceLines)
                 .HasForeignKey(d => d.ItemId)
@@ -458,14 +477,14 @@ public partial class TradingAppContext : DbContext
     {
         var entries = ChangeTracker
             .Entries()
-            .Where(e => e.Entity is AuditableEntity &&
+            .Where(e => e.Entity is BaseEntity &&
                         (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         foreach (var entry in entries)
         {
-            var auditableEntity = (AuditableEntity)entry.Entity;
+            var auditableEntity = (BaseEntity)entry.Entity;
 
             if (entry.State == EntityState.Added)
             {
@@ -485,14 +504,14 @@ public partial class TradingAppContext : DbContext
     {
         var entries = ChangeTracker
             .Entries()
-            .Where(e => e.Entity is AuditableEntity &&
+            .Where(e => e.Entity is BaseEntity &&
                         (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         foreach (var entry in entries)
         {
-            var auditableEntity = (AuditableEntity)entry.Entity;
+            var auditableEntity = (BaseEntity)entry.Entity;
 
             if (entry.State == EntityState.Added)
             {

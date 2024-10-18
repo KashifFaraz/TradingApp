@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace TradingApp.Models;
 
-public partial class Invoice: AuditableEntity
+public partial class Invoice: BaseEntity
 {
-    public int Id { get; set; }
+    
 
     public int? TransactionId { get; set; }
 

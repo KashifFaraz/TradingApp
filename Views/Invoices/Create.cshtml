@@ -4,209 +4,238 @@
 @{
     ViewData["Title"] = "Create";
 }
-<div class="sticky-header">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <!-- Left aligned heading -->
-        <h5 class="mb-0">Invoice</h5>
+@section PageHeaderContent {
+    <div class="sticky-header">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <!-- Left aligned heading -->
+            <h5 class="mb-0">
+                Invoice
+                @if (Model?.Id != null && Model.Id != 0)
+                {
+                    <span style="color: grey;"># @Model.Id</span>
+                }
+            </h5>
 
-        <!-- Right aligned buttons -->
-        <div class="d-flex">
-            @if (Model?.DocStatus == (byte)DocumentStatus.Finalized)
-            {
-                <form id="resetForm" class="me-2">
-                    @Html.AntiForgeryToken()
-                    <!-- Reset to Draft button -->
-                    <input type="submit" value="Reset to Draft" class="btn btn-primary" id="resetToDraftButton" />
-                </form>
-            }
-            @if (Model?.DocStatus == null || Model?.DocStatus == (byte)DocumentStatus.Draft)
-            {
-                <!-- Save button -->
+            <!-- Right aligned buttons -->
+            <div class="d-flex">
+                @if (Model?.DocStatus == (byte)DocumentStatus.Finalized)
+                {
+                    <form id="resetForm" class="me-2">
+                        @Html.AntiForgeryToken()
+                        <!-- Reset to Draft button -->
+                        <input type="submit" value="Reset to Draft" class="btn btn-primary" id="resetToDraftButton" />
+                    </form>
+                }
+                @if (Model?.DocStatus == null || Model?.DocStatus == (byte)DocumentStatus.Draft)
+                {
+                    <!-- Save button -->
 
-                <input type="submit" value="Save" class="btn btn-primary me-2" id="saveDraftButton" />
-                <input type="submit" value="Finalize" class="btn btn-primary" id="saveButton" />
-            }
+                    <input type="submit" value="Save" class="btn btn-primary me-2" id="saveDraftButton" />
+                    <input type="submit" value="Finalize" class="btn btn-primary" id="saveButton" />
+                }
+            </div>
         </div>
     </div>
-</div>
+}
 @* <hr /> *@
 
 <div id="resultContainer"></div>
 
 <form id="tradingForm" asp-action="Create">
     <div class="row">
-        <div class="col-md-12">
-            @* <div asp-validation-summary="All" class="text-danger"></div> *@
-          @*   <table class="table table-bordered table-striped">
-                @foreach (var item in ViewContext.ViewData.ModelState)
-                {
-                    if (item.Value.Errors.Any())
-                    {
-                        <tr>
-                            <td><b>@item.Key</b></td>
-                            <td>@((item.Value == null || item.Value == null) ? "<null>" : item.Value.RawValue)</td>
-                            <td>@(string.Join("; ", item.Value.Errors.Select(x => x.ErrorMessage)))</td>
-                        </tr>
-                    }
-                }
-            </table> *@
 
-            <div class="col-md-4">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="DocStatusInput" />
+        <div class="col-md-4">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Currency" value="@ViewBag.Currency" />
+            <input type="hidden" asp-for="DocStatusInput" />
 
-                
-                <input type="hidden" asp-for="Currency" value="@ViewBag.Currency" />
 
-                <div class="form-group">
-                    <label asp-for="CustomId" class="control-label"></label>
-                    <input asp-for="CustomId" class="form-control" />
-                    <span asp-validation-for="CustomId" class="text-danger"></span>
-                </div>
 
-                <div class="form-group">
-                    <label asp-for="DocDate" class="control-label"></label>
-                    <input asp-for="DocDate" class="form-control" type="date" />
-                    <span asp-validation-for="DocDate" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="StakeholderId" class="control-label"></label>
-                    @Html.DropDownListFor(model => model.StakeholderId, (SelectList)ViewData["Stakeholder"], "-- Select Customer --", new { @class = "form-control" })
-                    <span asp-validation-for="StakeholderId" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="DueDate" class="control-label"></label>
-                    <input asp-for="DueDate" class="form-control" type="date" />
-                    <span asp-validation-for="DueDate" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Description" class="control-label"></label>
-                    <textarea asp-for="Description" class="form-control"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-
+            <div class="form-group">
+                <label asp-for="CustomId" class="control-label"></label>
+                <input asp-for="CustomId" class="form-control" />
+                <span asp-validation-for="CustomId" class="text-danger"></span>
             </div>
-            @* ---line code-- *@
-            <div class="row">
-                <div class="col-md-12">
-                    <table id="tradingLinesTable" class="table">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Description</th>
-                                <th>Unit Price</th>
-                                <th>Quantity</th>
-                                <th>Amount</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (var i = 0; i < Model?.InvoiceLines.Count; i++)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="form-group">
-                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).ItemId" class="control-label"></label> *@
-                                            <select name="InvoiceLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this, @i)">
-                                                <option value="">-- Select Item --</option>
-                                                @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
-                                                {
-                                                    var itemViewModel = item as Item;
-
-                                                    if (item.Id.ToString() == Model.InvoiceLines.ElementAt(i).ItemId.ToString())
-                                                    {
-                                                        <option value="@item.Id" data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" selected>@item.Name</option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option value="@item.Id" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" data-price="@item.Price">@item.Name</option>
-                                                    }
-                                                }
-                                            </select>
-                                            <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].ItemId" data-valmsg-replace="true"></span>
-
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="hidden" name="InvoiceLines[@i].Id" value="@Model.InvoiceLines.ElementAt(i).Id" />
-
-                                        <div class="form-group">
-                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Description" class="control-label"></label> *@
-                                            <input name="InvoiceLines[@i].Description" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Description" />
-
-                                            <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Description" class="text-danger"></span>
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        <div class="input-group mb-3">
-                                            <input name="InvoiceLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(@i)" />
-                                            <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">@Model?.Currency</span>
-                                            <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].UnitPrice" data-valmsg-replace="true"></span>
-
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-group">
-                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="control-label"></label> *@
-                                            <input name="InvoiceLines[@i].Quantity" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Quantity" oninput="calculateAmount(@i)" />
-                                            <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="text-danger"></span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-group">
-                                            @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Amount" class="control-label"></label> *@
-                                            <input name="InvoiceLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
-                                            <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Amount" class="text-danger"></span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-group">
-                                            <button type="button" class="btn btn-danger" onclick="removeTradingDocumentDetail(this)">Remove Row</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-
-                </div>
+            <div class="form-group">
+                <label asp-for="DocDate" class="control-label"></label>
+                <input asp-for="DocDate" class="form-control" type="date" />
+                <span asp-validation-for="DocDate" class="text-danger"></span>
             </div>
-            <div class="mb-3">
-                <div class="row">
-                    <div id="InvoiceLinesContainer">
-                        <!-- Placeholder for dynamically added rows -->
-                    </div>
-                    <div class="col text-start">
-                        <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row </button>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label asp-for="StakeholderId" class="control-label"></label>
+                @Html.DropDownListFor(model => model.StakeholderId, (SelectList)ViewData["Stakeholder"], "-- Select Customer --", new { @class = "form-control" })
+                <span asp-validation-for="StakeholderId" class="text-danger"></span>
             </div>
-            <div class="mt-3">
-                <div class="row">
-                    <div class="col text-end">
-                        <h4>Subtotal: <span id="subtotalAmount">0.00</span></h4>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col text-end">
-                        <h4>Grand Total: <span id="grandTotalAmount">0.00</span></h4>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label asp-for="DueDate" class="control-label"></label>
+                <input asp-for="DueDate" class="form-control" type="date" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
-
-
-
-
-
-
-
-            @* --line code --- *@
-
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
 
         </div>
+        @if (Model?.PaymentReconciliationStatus != null && Model?.PaymentReconciliationStatus != (byte)PaymentReconciliationStatus.Unreconciled)
+        {
+            <div class="col-md-4">
+
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-muted">Paid Amount</h6>
+                                <p class="card-text fs-5">
+                                    @String.Format("{0:N}", Model?.TotalAmount - Model?.UnreconciledAmount)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-muted">Unpaid Amount</h6>
+                                <p class="card-text fs-5">@Html.DisplayFor(model => model.UnreconciledAmount)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        @* ---line code-- *@
+        <div class="row">
+            <div class="col-md-12">
+                <table id="tradingLinesTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Disc. %</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < Model?.InvoiceLines.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="form-group">
+                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).ItemId" class="control-label"></label> *@
+                                        <select name="InvoiceLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this, @i)">
+                                            <option value="">-- Select Item --</option>
+                                            @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
+                                            {
+                                                var itemViewModel = item as Item;
+
+                                                if (item.Id.ToString() == Model.InvoiceLines.ElementAt(i).ItemId.ToString())
+                                                {
+                                                    <option value="@item.Id" data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" selected>@item.Name</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" data-price="@item.Price">@item.Name</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].ItemId" data-valmsg-replace="true"></span>
+
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="hidden" name="InvoiceLines[@i].Id" value="@Model.InvoiceLines.ElementAt(i).Id" />
+
+                                    <div class="form-group">
+                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Description" class="control-label"></label> *@
+                                        <input name="InvoiceLines[@i].Description" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Description" />
+
+                                        <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Description" class="text-danger"></span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="input-group">
+                                        <input name="InvoiceLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(@i)" />
+                                        <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">@Model?.Currency</span>
+                                    </div>
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].UnitPrice" data-valmsg-replace="true"></span>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="control-label"></label> *@
+                                        <input name="InvoiceLines[@i].Quantity" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Quantity" oninput="calculateAmount(@i)" />
+                                        <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="text-danger"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <input name="InvoiceLines[@i].DiscountPercentage" class="form-control" value="@Model.InvoiceLines.ElementAt(i).DiscountPercentage" oninput="calculateAmount(@i)" />
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].DiscountPercentage" data-valmsg-replace="true"></span>
+                                        
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Amount" class="control-label"></label> *@
+                                        <input name="InvoiceLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
+                                        <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Amount" class="text-danger"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-outline-danger" onclick="removeTradingDocumentDetail(this)">
+                                            <i class="bi bi-trash"></i> 
+                                        </button>
+                                    </div>
+                                </td>
+
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="row">
+                <div id="InvoiceLinesContainer">
+                    <!-- Placeholder for dynamically added rows -->
+                </div>
+                <div class="col text-start">
+                    <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row </button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <div class="row">
+                <div class="col text-end">
+                    <h4>Subtotal: <span id="subtotalAmount">0.00</span></h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-end">
+                    <h4> Total: <span id="grandTotalAmount">0.00</span></h4>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+        @* --line code --- *@
+
+
+
     </div>
 </form>
 
@@ -215,18 +244,6 @@
 </div>
 
 
-<style>
-
-    .sticky-header {
-        position: sticky;
-        top: 0;
-        z-index: 1020; /* Ensure it stays above other elements */
-        background-color: white; /* Matches the background */
-        padding: 10px 0; /* Optional padding */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for visual separation */
-    }
-
-</style>
 
 @section Scripts {
     <script>
@@ -253,6 +270,60 @@
             // Log the validator object
             console.log(validator);
         }
+
+        function submitForm() {
+            initializeValidation();
+            $.validator.unobtrusive.parse(".target");
+            $("#tradingForm").removeData("validator").removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse("#tradingForm");
+
+            // Access the validator object
+            var validator = $('#tradingForm').validate();
+
+            $('input[name^="InvoiceLines["][name$="].UnitPrice"]').each(function (index) {
+                var fieldName = $(this).attr('name');
+                // Ensure that the rules object exists for the current input field
+                if (!validator.settings.rules[fieldName]) {
+                    validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
+                }
+                // Add new validation rules
+                validator.settings.rules[fieldName]['required'] = true;
+                // Add more validation rules as needed
+
+                // Optionally, add messages for the new validation rules
+                validator.settings.messages[fieldName] = {
+                    required: "Please enter a value for Unit Price"// Custom message for required rule
+                    // Add more messages as needed
+                };
+            });
+
+            // Validate Discount Percentage fields
+            $('input[name^="InvoiceLines["][name$="].DiscountPercentage"]').each(function (index) {
+                var fieldName = $(this).attr('name');
+
+                // Ensure that the rules object exists for the current input field
+                if (!validator.settings.rules[fieldName]) {
+                    validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
+                }
+
+                // Add new validation rules for Discount Percentage
+                validator.settings.rules[fieldName]['range'] = [0, 100]; // Must be between 0 and 100
+
+                // Add messages for the new validation rules
+                validator.settings.messages[fieldName] = {
+                    range: "Discount Percentage must be between 0 and 100." // Custom message for range validation
+                };
+
+            });
+
+
+            // Manually trigger client-side validation
+            if (validateForm()) {
+                // If validation passes, proceed with form submission
+                document.getElementById('tradingForm').submit();
+            }
+
+        }
         document.addEventListener('DOMContentLoaded', function () {
 
             var resetButton = document.getElementById('resetToDraftButton');
@@ -261,8 +332,8 @@
             var tradingForm = document.getElementById('tradingForm');
             var docStatusElement = document.getElementById('DocStatusInput');
 
-            
-           
+
+
 
             // Save Draft
             if (saveDraftButton) {
@@ -270,7 +341,7 @@
                     // form treat as Draft
                     docStatusElement.value = DocumentStatus.Draft;
                     // Submit the form for saving draft
-                    tradingForm.submit();
+                    submitForm();
                 });
             }
 
@@ -280,7 +351,7 @@
                     // form treat as Finailze
                     docStatusElement.value = DocumentStatus.Finalized;
                     // Submit the form for finalizing
-                    tradingForm.submit();
+                    submitForm();
                 });
             }
 
@@ -328,78 +399,16 @@
                             $('#resultContainer').html('<div class="alert alert-danger">An error occurred while resetting the invoice.</div>');
                         });;
                 });
-            
-            }      
-           
 
-
-            // Add click event listener to the Save button
-            document.getElementById('saveButton').addEventListener('click', function () {
-                initializeValidation();
-                $.validator.unobtrusive.parse(".target");
-                $("#tradingForm").removeData("validator").removeData("unobtrusiveValidation");
-                $.validator.unobtrusive.parse("#tradingForm");
-
-                // Access the validator object
-                var validator = $('#tradingForm').validate();
-
-                $('select[name^="InvoiceLines["][name$="].ItemId"]').each(function (index) {
-                    var fieldName = $(this).attr('name');
-                    // Ensure that the rules object exists for the current input field
-                    if (!validator.settings.rules[fieldName]) {
-                        validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
-                    }
-                    // Add new validation rules
-                    validator.settings.rules[fieldName]['required'] = true;
-                    // Add more validation rules as needed
-
-                    // Optionally, add messages for the new validation rules
-                    validator.settings.messages[fieldName] = {
-                        required: "Please select an item"// Custom message for required rule
-                        // Add more messages as needed
-                    };
-                });
-
-                $('input[name^="InvoiceLines["][name$="].UnitPrice"]').each(function (index) {
-                    var fieldName = $(this).attr('name');
-                    // Ensure that the rules object exists for the current input field
-                    if (!validator.settings.rules[fieldName]) {
-                        validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
-                    }
-                    // Add new validation rules
-                    validator.settings.rules[fieldName]['required'] = true;
-                    // Add more validation rules as needed
-
-                    // Optionally, add messages for the new validation rules
-                    validator.settings.messages[fieldName] = {
-                        required: "Please enter a value for Unit Price"// Custom message for required rule
-                        // Add more messages as needed
-                    };
-                });
-
-
-                // Log all validation rules
-                Object.keys(validator.settings.rules).forEach(function (fieldName) {
-                    console.log("Field: " + fieldName);
-                    console.log("Rules: ", validator.settings.rules[fieldName]);
-                });
+            }
 
 
 
-                // Manually trigger client-side validation
-                if (validateForm()) {
-                    // If validation passes, proceed with form submission
-                    document.getElementById('#tradingForm').submit();
-                }
-            });
         });
-
         function validateForm() {
             // Assuming you're using jQuery Validate for client-side validation
             return $('#tradingForm').valid(); // Replace 'yourFormId' with the ID of your form
         }
-
-
         // Global variable to keep track of the current index
 
         var currentIndex = @(Model?.InvoiceLines.Count ?? 0);
@@ -417,67 +426,67 @@
             // Create a new row
             var newRow = document.createElement('tr');
 
-            newRow.innerHTML = `<td>
-                                                                                                      <div class="form-group">
-                                                                                                          <select name="InvoiceLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this, ${currentIndex})">
-                                                                                                              <option value="">-- Select Item --</option>
+            newRow.innerHTML = `
+                                                <td>
+                                                    <div class="form-group">
+                                                        <select name="InvoiceLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this, ${currentIndex})">
+                                                            <option value="">-- Select Item --</option>
         @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
         {
-                                                                                                                                                                                          <option data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" value="@item.Id">@item.Name</option>
+                                                                                    <option data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" value="@item.Id">@item.Name</option>
         }
-                                                                                                          </select>
-                                                                                                          <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
-                                                                                                      </div>
-                                                                                                  </td>
-                                                                                                  <td>
-                                                                                                      <div class="form-group">
-                                                                                                          <input name="InvoiceLines[${currentIndex}].Description" class="form-control" />
-                                                                                                          <span asp-validation-for="InvoiceLines[${currentIndex}].Description" class="text-danger"></span>
-
-
-                                                                                                      </div>
-                                                                                                  </td>
-                                                                                                  <td>
-                                                                                                              <div class="input-group mb-3">
-
-                                                                                                          <input name="InvoiceLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
-                                                                                                          <span class="input-group-text" name="InvoiceLines[${currentIndex}].Item.SaleUnitNavigation.Symbol"></span>
-                                                                                                          <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
-
-
-
-
-                                                                                                      </div>
-                                                                                                  </td>
-                                                                                                  <td>
-                                                                                                      <div class="form-group">
-
-                                                                                                          <input name="InvoiceLines[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
-                                                                                                          <span asp-validation-for="InvoiceLines[${currentIndex}].Quantity" class="text-danger"></span>
-                                                                                                      </div>
-                                                                                                  </td>
-                                                                                                  <td>
-
-                                                                                                      <div class="form-group">
-
-                                                                                                          <input name="InvoiceLines[${currentIndex}].Amount" class="form-control" readonly />
-                                                                                                          <span asp-validation-for="InvoiceLines[${currentIndex}].Amount" class="text-danger"></span>
-                                                                                                      </div>
-                                                                                                  </td>
-                                                                                                  <td>
-                                                                                                      <div class="form-group">
-                                                                                                          <button type="button" class="btn btn-danger" onclick="removeTradingDocumentDetail(this)">Remove Row</button>
-                                                                                                      </div>
-                                                                                                  </td>
-                                                                                                  `;
+                                                        </select>
+                                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input name="InvoiceLines[${currentIndex}].Description" class="form-control" />
+                                                        <span asp-validation-for="InvoiceLines[${currentIndex}].Description" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group">
+                                                        <input name="InvoiceLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                                        <span class="input-group-text" name="InvoiceLines[${currentIndex}].Item.SaleUnitNavigation.Symbol"></span>
+                                                    </div>
+                                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input name="InvoiceLines[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                                        <span asp-validation-for="InvoiceLines[${currentIndex}].Quantity" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                 <td>
+                                                    <div class="form-group">
+                                                        <input name="InvoiceLines[${currentIndex}].DiscountPercentage" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].DiscountPercentage" data-valmsg-replace="true"></span>
+                                                        <span asp-validation-for="InvoiceLines[${currentIndex}].DiscountPercentage" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input name="InvoiceLines[${currentIndex}].Amount" class="form-control" readonly />
+                                                        <span asp-validation-for="InvoiceLines[${currentIndex}].Amount" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                    <button type="button" class="btn btn-outline-danger" onclick="removeTradingDocumentDetail(this)">
+                                                    <i class="bi bi-trash"></i> 
+                                                    </button>
+                                                    </div>
+                                                </td>
+                                            `;
 
             // Append the new row to the table body
             tableBody.appendChild(newRow);
 
             // Increment the index for the next row
             currentIndex++;
-
         }
+
 
         // JavaScript function to remove a row for InvoiceLines
         function removeTradingDocumentDetail(button) {
@@ -491,8 +500,12 @@
         function calculateAmount(index) {
             var unitPrice = parseFloat(document.getElementsByName(`InvoiceLines[${index}].UnitPrice`)[0].value) || 0;
             var quantity = parseFloat(document.getElementsByName(`InvoiceLines[${index}].Quantity`)[0].value) || 0;
+            var discount = parseFloat(document.getElementsByName(`InvoiceLines[${index}].DiscountPercentage`)[0].value) || 0;
+            // Calculate the total before discount
             var amount = unitPrice * quantity;
-            document.getElementsByName(`InvoiceLines[${index}].Amount`)[0].value = amount.toFixed(2); //formatNumberWithCommas((parseFloat(amount) || 0).toFixed(2)); // make problem in calculation
+            // Apply discount percentage
+            var discountedAmount = amount - (amount * (discount / 100));
+            document.getElementsByName(`InvoiceLines[${index}].Amount`)[0].value = discountedAmount.toFixed(2); //formatNumberWithCommas((parseFloat(amount) || 0).toFixed(2)); // make problem in calculation
             calculateGrandTotal();
         }
 
@@ -501,18 +514,25 @@
         // Calculate and display the grand total
         function calculateGrandTotal() {
             var grandTotal = 0;
+            var subTotal = 0;
 
             // Iterate through each row in the table
             var rows = document.querySelectorAll('#tradingLinesTable tbody tr');
             rows.forEach(function (row) {
                 // Get the amount input element in the current row
                 var amountInput = row.querySelector('input[name^="InvoiceLines["][name$="].Amount"]');
+                var discountPercentageInput = row.querySelector('input[name^="InvoiceLines["][name$="].DiscountPercentage"]');
+                var discountPercentage = parseFloat(discountPercentageInput.value) || 0;
 
                 // Get the value of the amount input (assuming it's a numeric value)
                 var amount = parseFloat(amountInput.value) || 0;
 
+
+                var subTotalLine = amount / (100 - discountPercentage) * 100;
+
                 // Accumulate the amount to the grand total
                 grandTotal += amount;
+                subTotal += subTotalLine;
             });
 
             // Display the grand total
@@ -524,17 +544,18 @@
             var subtotalAmountElement = document.getElementById('subtotalAmount');
 
             if (subtotalAmountElement) {
-                subtotalAmountElement.textContent = formatNumberWithCommas(grandTotal.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
+                subtotalAmountElement.textContent = formatNumberWithCommas(subTotal.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
             }
 
         }
 
 
         // Check if the URL contains "/Create/0" to add the first row
-        if (window.location.href.includes("/Create/0")) {
-            // Add first row
+        if (window.location.href.includes("/Create/0") && $('#tradingLinesTable tbody tr').length === 0) {
+            // Add first row only if the table is empty
             addTradingDocumentDetail();
         }
+
         function formatNumberWithCommas(number) {
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }

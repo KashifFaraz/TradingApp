@@ -87,6 +87,11 @@
             </div>
         </nav>
     </header>
+
+    @if (IsSectionDefined("PageHeaderContent"))
+    {
+        @RenderSection("PageHeaderContent", required: false)
+    }
     <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()

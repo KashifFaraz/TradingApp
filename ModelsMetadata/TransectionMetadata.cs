@@ -2,13 +2,14 @@
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TradingApp.Attribute;
 using TradingApp.Models;
 using TradingApp.Utility;
 
 namespace TradingApp.Models
 {
     [ModelMetadataType(typeof(TransectionMetadata))]
-    public partial class Invoice: AuditableEntity
+    public partial class Invoice: BaseEntity
     {
         //public Constants.PaymentType PaymentType { get; set; }
         //[NotMapped]
@@ -41,6 +42,7 @@ namespace TradingApp.Models
         [Display(Name = "RFQ")]
         public int? Rfqid { get; set; }
         [Display(Name = "Due Date")]
+        [DateGreaterThan("DocDate", ErrorMessage = "Due Date must be greater than Document Date.")]
         [DisplayFormat(DataFormatString = "{0:d}", NullDisplayText = "")]
         public DateTime? DueDate { get; set; }
 

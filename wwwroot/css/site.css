@@ -77,7 +77,6 @@ table.resizable-table th {
     z-index: 50; /* Ensure it stays above other elements */
     background-color: white; /* Matches the background */
     padding: 10px;
-    margin: -16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for visual separation */
 }
 /*Fix Action Button Header*/

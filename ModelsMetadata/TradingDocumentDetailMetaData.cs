@@ -12,7 +12,6 @@ namespace TradingApp.Models
     public class TradingDocumentDetailMetaData
     {
 
-        [Required]
         public int? ItemId { get; set; }
         [Required]
         [Display(Name = "Unit Price")]
@@ -23,6 +22,11 @@ namespace TradingApp.Models
         public decimal? Amount { get; set; }
         [Required]
         public int? Quantity { get; set; }
+
+        [Display(Name = "Discount Percentage")]
+
+        [Range(0,100)]
+        public  decimal? DiscountPercentage { get; set; }
 
         [JsonIgnore]
         public virtual Invoice? Master { get; set; }

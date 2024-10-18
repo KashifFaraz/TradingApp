@@ -128,7 +128,10 @@ namespace TradingApp.Controllers
             // Calculate the amount for each invoice line
             foreach (var item in entity.InvoiceLines)
             {
-                item.Amount = item.UnitPrice * item.Quantity;
+                item.SubTotal = item.UnitPrice * item.Quantity;
+
+                //Discounted Amount
+                item.Amount = item.SubTotal - (item.SubTotal * (item.DiscountPercentage / 100));
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -141,8 +144,8 @@ namespace TradingApp.Controllers
             entity.Currency = organization?.DefaultCurrency;
 
             // Calculate totals
-            entity.SubTotal = entity.InvoiceLines.Sum(x => x.Amount);
-            entity.TotalAmount = entity.SubTotal;
+            entity.SubTotal = entity.InvoiceLines.Sum(x => x.SubTotal);
+            entity.TotalAmount = entity.InvoiceLines.Sum(x => x.Amount);
             entity.UnreconciledAmount = entity.SubTotal;
 
             // Start a database transaction
@@ -467,7 +470,13 @@ namespace TradingApp.Controllers
             invoice.AccountTitle = param.AccountTitle;
             invoice.DueDate = param.DueDate;
             invoice.Description = param.Description;
+            invoice.SubTotal = param.SubTotal;
+            invoice.TotalAmount = param.TotalAmount;
+            invoice.UnreconciledAmount = param.UnreconciledAmount;
+            invoice.Currency = param.Currency;
+            invoice.OrganizationId = param.OrganizationId;
 
+            
 
 
 
@@ -574,7 +583,7 @@ namespace TradingApp.Controllers
             AccountId = accounts["Cost of Goods Sold"].Id,
             TransactionId = invoice.TransactionId.Value,
             Type = "C",
-            Amount = 0 // Add discount logic if required
+            Amount = invoice.TotalAmount.Value-invoice.SubTotal.Value // Add discount logic if required
         }
     };
         }

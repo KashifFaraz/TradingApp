@@ -81,3 +81,15 @@ table.resizable-table th {
 }
 /*Fix Action Button Header*/
 
+
+
+.no-outline {
+    border: none !important; /* Remove border */
+    outline: none !important; /* Remove outline */
+    box-shadow: none !important; /* Remove box shadow if any */
+}
+
+    /*.no-outline:hover {
+        background-color: #f1f3f4;*/ /* Optional: add subtle hover effect */
+        /*color: #000;*/ /* Optional: change icon color on hover */
+    /*}*/

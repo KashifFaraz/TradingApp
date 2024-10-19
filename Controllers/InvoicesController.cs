@@ -113,7 +113,7 @@ namespace TradingApp.Controllers
 
 
 
-       
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -132,6 +132,8 @@ namespace TradingApp.Controllers
 
                 //Discounted Amount
                 item.Amount = item.SubTotal - (item.SubTotal * (item.DiscountPercentage / 100));
+                item.TaxAmount = item.Amount / 100 * item.TaxPercentage;
+
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -145,7 +147,8 @@ namespace TradingApp.Controllers
 
             // Calculate totals
             entity.SubTotal = entity.InvoiceLines.Sum(x => x.SubTotal);
-            entity.TotalAmount = entity.InvoiceLines.Sum(x => x.Amount);
+            entity.TaxAmount = entity.InvoiceLines.Sum(x => x.TaxAmount);
+            entity.TotalAmount = entity.InvoiceLines.Sum(x => x.Amount) + entity.TaxAmount;
             entity.UnreconciledAmount = entity.SubTotal;
 
             // Start a database transaction
@@ -197,7 +200,7 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-       
+
 
 
 
@@ -264,12 +267,12 @@ namespace TradingApp.Controllers
                 return BadRequest(new { Errors = "Only finalized invoices can be reset to draft." });
 
             }
-           
-            if (entity.PaymentReconciliationStatus!= (byte)PaymentReconciliationStatus.Unreconciled)
+
+            if (entity.PaymentReconciliationStatus != (byte)PaymentReconciliationStatus.Unreconciled)
             {
 
 
-                return BadRequest(new { Errors = "Only Unreconciled invoices can be reset to draft." }); 
+                return BadRequest(new { Errors = "Only Unreconciled invoices can be reset to draft." });
             }
 
             // Reverse the transaction and related journal entries
@@ -439,7 +442,7 @@ namespace TradingApp.Controllers
 
             MapInvoiceParamToInvoiceEntity(entity, invoice);
 
-           
+
 
             _context.Update(invoice);
 
@@ -476,7 +479,7 @@ namespace TradingApp.Controllers
             invoice.Currency = param.Currency;
             invoice.OrganizationId = param.OrganizationId;
 
-            
+
 
 
 

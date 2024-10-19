@@ -19,18 +19,10 @@ public partial class InvoiceLine : BaseEntity
     public decimal? Amount { get; set; }
 
     public int? Quantity { get; set; }
-    public virtual decimal? DiscountPercentage { get; set; }
-
-    //public int? CreatedBy { get; set; }
-
-    //public DateTime? CraetedOn { get; set; }
-
-    //public int? EditedBy { get; set; }
-
-    //public DateTime? EditedOn { get; set; }
-
-    //public bool? IsActive { get; set; }
-
+    public  decimal? DiscountPercentage { get; set; }
+    public  decimal? TaxPercentage { get; set; }
+    public  decimal? TaxAmount { get; set; }
+    
     public virtual Item? Item { get; set; }
     
     public virtual Invoice? Master { get; set; }

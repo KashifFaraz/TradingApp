@@ -170,6 +170,14 @@
         <div class="row">
             <div class="col text-end">
                 <h4>
+                    <label asp-for="TaxAmount" class="control-label"></label>
+                    @Html.DisplayFor(modelItem => modelItem.TaxAmount)  @Html.DisplayFor(modelItem => modelItem.Currency)
+                </h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-end">
+                <h4>
                     <label asp-for="TotalAmount" class="control-label"></label>
                     @Html.DisplayFor(modelItem => modelItem.TotalAmount) @Html.DisplayFor(modelItem => modelItem.Currency)
                 </h4>

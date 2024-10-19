@@ -223,6 +223,7 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
             entity.Property(e => e.Rfqid).HasColumnName("RFQId");
             entity.Property(e => e.SubTotal).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TaxAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnreconciledAmount).HasColumnType("decimal(18, 2)");
 
@@ -265,14 +266,12 @@ public partial class TradingAppContext : DbContext
 
         modelBuilder.Entity<InvoiceLine>(entity =>
         {
-            //entity.HasKey(e => e.Id).HasName("PK_TradingDocumentDetails");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TaxPercentage).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TaxAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Description).HasMaxLength(500);
-            //entity.Property(e => e.CreatedOn).HasColumnType("datetime");
-            //entity.Property(e => e.EditedOn).HasColumnType("datetime");
-            //entity.Property(e => e.IsActive).HasDefaultValueSql("((1))");
-
+            
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.DiscountPercentage).HasColumnType("decimal(18, 2)");
 

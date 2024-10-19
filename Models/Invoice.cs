@@ -35,7 +35,6 @@ public partial class Invoice: BaseEntity
 
     public decimal? SubTotal { get; set; }
 
-    public decimal? TotalAmount { get; set; }
 
     public byte? PaymentType { get; set; }
 
@@ -48,16 +47,10 @@ public partial class Invoice: BaseEntity
     
 
     public int? OrganizationId { get; set; }
+    public decimal? TaxAmount { get; set; }
+    public decimal? TotalAmount { get; set; }
+    
 
-    //public bool? IsActive { get; set; }
-
-    //public int? CreatedBy { get; set; }
-
-    //public DateTime? CreatedOn { get; set; }
-
-    //public int? EditedBy { get; set; }
-
-    //public DateTime? EditedOn { get; set; }
 
     public virtual AppUser? CreatedByNavigation { get; set; }
 

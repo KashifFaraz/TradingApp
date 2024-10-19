@@ -62,6 +62,9 @@ namespace TradingApp.Models
         [Display(Name = "Total Amount")]
         [DisplayFormat(DataFormatString = "{0:N}")]
         public decimal? TotalAmount { get; set; }
+        [Display(Name = "Tax Amount")]
+        [DisplayFormat(DataFormatString = "{0:N}")]
+        public decimal? TaxAmount { get; set; }
         [Display(Name = "Total Paid")]
         [DisplayFormat(DataFormatString = "{0:N}")]
         public decimal TotalPaid { get; set; }

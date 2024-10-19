@@ -117,6 +117,7 @@
                             <th>Unit Price</th>
                             <th>Quantity</th>
                             <th>Disc. %</th>
+                            <th>Tax %</th>
                             <th>Amount</th>
                             <th>Action</th>
                         </tr>
@@ -182,6 +183,13 @@
                                 </td>
                                 <td>
                                     <div class="form-group">
+                                        <input name="InvoiceLines[@i].TaxPercentage" class="form-control" value="@Model.InvoiceLines.ElementAt(i).TaxPercentage" oninput="calculateAmount(@i)" />
+                                        <input type="hidden" name="InvoiceLines[@i].TaxAmount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).TaxAmount" />
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].TaxAmount" data-valmsg-replace="true"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
                                         @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Amount" class="control-label"></label> *@
                                         <input name="InvoiceLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
                                         <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Amount" class="text-danger"></span>
@@ -217,6 +225,11 @@
             <div class="row">
                 <div class="col text-end">
                     <h4>Subtotal: <span id="subtotalAmount">0.00</span></h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-end">
+                    <h4>Untaxed Amount: <span id="UntaxedAmount">0.00</span></h4>
                 </div>
             </div>
             <div class="row">
@@ -316,7 +329,24 @@
 
             });
 
+            // Validate Discount Percentage fields
+            $('input[name^="InvoiceLines["][name$="].TaxPercentage"]').each(function (index) {
+                var fieldName = $(this).attr('name');
 
+                // Ensure that the rules object exists for the current input field
+                if (!validator.settings.rules[fieldName]) {
+                    validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
+                }
+
+                // Add new validation rules for Discount Percentage
+                validator.settings.rules[fieldName]['range'] = [0, 100]; // Must be between 0 and 100
+
+                // Add messages for the new validation rules
+                validator.settings.messages[fieldName] = {
+                    range: "Discount Percentage must be between 0 and 100." // Custom message for range validation
+                };
+
+            });
             // Manually trigger client-side validation
             if (validateForm()) {
                 // If validation passes, proceed with form submission
@@ -467,6 +497,14 @@
                                                 </td>
                                                 <td>
                                                     <div class="form-group">
+                                                        <input name="InvoiceLines[${currentIndex}].TaxPercentage" class="form-control" oninput="calculateAmount(${currentIndex})" />
+                                                        <input type="hidden" name="InvoiceLines[${currentIndex}].TaxAmount" class="form-control"  />
+                                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].TaxPercentage" data-valmsg-replace="true"></span>
+                                                        <span asp-validation-for="InvoiceLines[${currentIndex}].TaxPercentage" class="text-danger"></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
                                                         <input name="InvoiceLines[${currentIndex}].Amount" class="form-control" readonly />
                                                         <span asp-validation-for="InvoiceLines[${currentIndex}].Amount" class="text-danger"></span>
                                                     </div>
@@ -501,6 +539,9 @@
             var unitPrice = parseFloat(document.getElementsByName(`InvoiceLines[${index}].UnitPrice`)[0].value) || 0;
             var quantity = parseFloat(document.getElementsByName(`InvoiceLines[${index}].Quantity`)[0].value) || 0;
             var discount = parseFloat(document.getElementsByName(`InvoiceLines[${index}].DiscountPercentage`)[0].value) || 0;
+            var taxPercentage = parseFloat(document.getElementsByName(`InvoiceLines[${index}].TaxPercentage`)[0].value) || 0;
+
+            
             // Calculate the total before discount
             var amount = unitPrice * quantity;
             // Apply discount percentage
@@ -515,24 +556,29 @@
         function calculateGrandTotal() {
             var grandTotal = 0;
             var subTotal = 0;
-
+            var untaxedAmount =0;
             // Iterate through each row in the table
             var rows = document.querySelectorAll('#tradingLinesTable tbody tr');
             rows.forEach(function (row) {
                 // Get the amount input element in the current row
                 var amountInput = row.querySelector('input[name^="InvoiceLines["][name$="].Amount"]');
                 var discountPercentageInput = row.querySelector('input[name^="InvoiceLines["][name$="].DiscountPercentage"]');
+                var taxPercentageInput = row.querySelector('input[name^="InvoiceLines["][name$="].TaxPercentage"]');
                 var discountPercentage = parseFloat(discountPercentageInput.value) || 0;
+                var taxPercentage = parseFloat(taxPercentageInput.value) || 0;
 
-                // Get the value of the amount input (assuming it's a numeric value)
+
                 var amount = parseFloat(amountInput.value) || 0;
+
+                var taxAmount = amount / 100 * taxPercentage;
 
 
                 var subTotalLine = amount / (100 - discountPercentage) * 100;
 
                 // Accumulate the amount to the grand total
-                grandTotal += amount;
                 subTotal += subTotalLine;
+                untaxedAmount += amount;
+                grandTotal += taxAmount + amount;
             });
 
             // Display the grand total
@@ -546,7 +592,11 @@
             if (subtotalAmountElement) {
                 subtotalAmountElement.textContent = formatNumberWithCommas(subTotal.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
             }
+            var untaxedAmountElement = document.getElementById('UntaxedAmount');
 
+            if (untaxedAmountElement) {
+                untaxedAmountElement.textContent = formatNumberWithCommas(untaxedAmount.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
+            }
         }
 
 

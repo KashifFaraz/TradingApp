@@ -88,8 +88,34 @@ table.resizable-table th {
     outline: none !important; /* Remove outline */
     box-shadow: none !important; /* Remove box shadow if any */
 }
+.borderless-table, .no-padding-table th {
+    border-color: white !important; /* Remove table border */
+}
 
-    /*.no-outline:hover {
-        background-color: #f1f3f4;*/ /* Optional: add subtle hover effect */
-        /*color: #000;*/ /* Optional: change icon color on hover */
-    /*}*/
+.no-padding-table td  {
+    padding-top: 3px !important; /* Set top padding to 0 */
+    padding-bottom: 3px !important; /* Set top padding to 0 */
+    margin: 0 !important; /* Remove any margin */
+}
+
+/*drag and drop row*/
+.dragged-row {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+}
+
+.drop-target {
+    border: 1px dashed #999;
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+
+
+/*drag and drop row*/

@@ -26,7 +26,7 @@ namespace TradingApp.Models
         [Display(Name = "Discount Percentage")]
 
         [Range(0,100)]
-        public  decimal? DiscountPercentage { get; set; }
+        public  decimal DiscountPercentage { get; set; }
 
         [JsonIgnore]
         public virtual Invoice? Master { get; set; }

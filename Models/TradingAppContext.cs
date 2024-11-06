@@ -273,7 +273,7 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.Description).HasMaxLength(500);
             
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.DiscountPercentage).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.DiscountPercentage).HasColumnType("decimal(18, 2)").HasDefaultValue(0);
 
             entity.HasOne(d => d.Item).WithMany(p => p.InvoiceLines)
                 .HasForeignKey(d => d.ItemId)

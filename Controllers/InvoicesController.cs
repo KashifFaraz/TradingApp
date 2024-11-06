@@ -89,7 +89,7 @@ namespace TradingApp.Controllers
             if (id is not null && id != 0)
             {
                 var tradingDocument = await _context.Invoices
-                    .Include(t => t.InvoiceLines)
+                    .Include(t => t.InvoiceLines.OrderBy(line => line.SortOrder))
                     .ThenInclude(il => il.Item)
                    .ThenInclude(il => il.SaleUnitNavigation)
                     .Include(t => t.Stakeholder)
@@ -149,7 +149,7 @@ namespace TradingApp.Controllers
             entity.SubTotal = entity.InvoiceLines.Sum(x => x.SubTotal);
             entity.TaxAmount = entity.InvoiceLines.Sum(x => x.TaxAmount);
             entity.TotalAmount = entity.InvoiceLines.Sum(x => x.Amount) + entity.TaxAmount;
-            entity.UnreconciledAmount = entity.SubTotal;
+            entity.UnreconciledAmount = entity.TotalAmount;
 
             // Start a database transaction
             using (var dbTransaction = await _context.Database.BeginTransactionAsync())
@@ -432,12 +432,12 @@ namespace TradingApp.Controllers
 
             if (invoice == null || invoice.UnreconciledAmount != invoice.TotalAmount)
             {
-                new Result(false, "Invoice cannot be changed, payment already exists.");
+                return new Result(false, "Invoice cannot be changed, payment already exists.");
             }
 
             if (invoice.DocStatus != (byte)DocumentStatus.Draft)
             {
-                new Result(false, "Unable to edit due to the current document status.");
+                return new Result(false, "Unable to edit due to the current document status.");
             }
 
             MapInvoiceParamToInvoiceEntity(entity, invoice);
@@ -488,8 +488,11 @@ namespace TradingApp.Controllers
             if (param.InvoiceLines != null)
             {
                 invoice.InvoiceLines.Clear(); // Clear the existing lines and reassign
+                int index = 0;
                 foreach (var line in param.InvoiceLines)
                 {
+                    line.SortOrder = index; 
+                    index++;
                     invoice.InvoiceLines.Add(line);
                 }
             }

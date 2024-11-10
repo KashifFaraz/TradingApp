@@ -2,14 +2,16 @@
 @model TradingApp.Models.Invoice
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Invoice Form";
 }
 @section PageHeaderContent {
     <div class="sticky-header">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <!-- Left aligned heading -->
             <h5 class="mb-0">
-                Invoice
+                <a href="@Url.Action("Index", "Invoices")" class="btn btn-secondary me-2">Back to Invoices</a>
+
+
                 @if (Model?.Id != null && Model.Id != 0)
                 {
                     <span style="color: grey;"># @Model.Id</span>
@@ -44,8 +46,8 @@
 <form id="tradingForm" asp-action="Create">
     <div class="row">
 
+        <div asp-validation-summary="All" class="text-danger"></div>
         <div class="col-md-4">
-            <div asp-validation-summary="All" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="Currency" value="@ViewBag.Currency" />
             <input type="hidden" asp-for="DocStatusInput" />
@@ -55,29 +57,45 @@
             <div class="form-group">
                 <label asp-for="CustomId" class="control-label"></label>
                 <input asp-for="CustomId" class="form-control" />
-                <span asp-validation-for="CustomId" class="text-danger"></span>
+                <span class="text-danger field-validation-valid" data-valmsg-for="CustomId" data-valmsg-replace="true"></span>
+               
             </div>
             <div class="form-group">
                 <label asp-for="DocDate" class="control-label"></label>
                 <input asp-for="DocDate" class="form-control" type="date" />
-                <span asp-validation-for="DocDate" class="text-danger"></span>
+                <span class="text-danger field-validation-valid" data-valmsg-for="DocDate" data-valmsg-replace="true"></span>
             </div>
             <div class="form-group">
                 <label asp-for="StakeholderId" class="control-label"></label>
                 @Html.DropDownListFor(model => model.StakeholderId, (SelectList)ViewData["Stakeholder"], "-- Select Customer --", new { @class = "form-control" })
-                <span asp-validation-for="StakeholderId" class="text-danger"></span>
+                <span class="text-danger field-validation-valid" data-valmsg-for="StakeholderId" data-valmsg-replace="true"></span>
+
             </div>
             <div class="form-group">
                 <label asp-for="DueDate" class="control-label"></label>
                 <input asp-for="DueDate" class="form-control" type="date" />
-                <span asp-validation-for="DueDate" class="text-danger"></span>
+                <span class="text-danger field-validation-valid" data-valmsg-for="DueDate" data-valmsg-replace="true"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Description" data-valmsg-replace="true"></span>
+               
             </div>
 
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="terms" class="control-label">Terms</label>
+                <textarea asp-for="Terms" class="form-control" id="terms" rows="3" maxlength="1000"></textarea>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Terms" data-valmsg-replace="true"></span>
+                
+            </div>
+            <div class="form-group mt-3">
+                <label for="notes" class="control-label">Notes</label>
+                <textarea asp-for="Notes" class="form-control" id="notes" rows="3" maxlength="1000"></textarea>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Notes" data-valmsg-replace="true"></span>
+            </div>
         </div>
         @if (Model?.PaymentReconciliationStatus != null && Model?.PaymentReconciliationStatus != (byte)PaymentReconciliationStatus.Unreconciled)
         {
@@ -106,162 +124,172 @@
                 </div>
             </div>
         }
-        @* ---line code-- *@
-        <div class="row">
-            <div class="col-md-12">
-                <table id="tradingLinesTable" class="table table-hover borderless-table no-padding-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Item</th>
-                            <th>Description</th>
-                            <th>Unit Price</th>
-                            <th>Quantity</th>
-                            <th>Disc. %</th>
-                            <th>Tax %</th>
-                            <th>Amount</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (var i = 0; i < Model?.InvoiceLines.Count; i++)
-                        {
-                            <tr id="row-@i" tabindex="0"
-                                ondragover="allowDrop(event)"
-                                ondrop="drop(event)"
-                                ondragleave="dragLeave(event)">
-                                <td>
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-outline-secondary no-outline drag-handle"
-                                                draggable="true"
-                                                ondragstart="drag(event)"
-                                                ondragend="dragEnd()"
-                                                aria-label="Drag to move row">
-                                            <i class="bi bi-grip-vertical"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).ItemId" class="control-label"></label> *@
-                                        <select name="InvoiceLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this)">
-                                            <option value="">-- Select Item --</option>
-                                            @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
-                                            {
-                                                var itemViewModel = item as Item;
-
-                                                if (item.Id.ToString() == Model.InvoiceLines.ElementAt(i).ItemId.ToString())
-                                                {
-                                                    <option value="@item.Id" data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" selected>@item.Name</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="@item.Id" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" data-price="@item.Price">@item.Name</option>
-                                                }
-                                            }
-                                        </select>
-                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].ItemId" data-valmsg-replace="true"></span>
-
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="hidden" name="InvoiceLines[@i].Id" value="@Model.InvoiceLines.ElementAt(i).Id" />
-
-                                    <div class="form-group">
-                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Description" class="control-label"></label> *@
-                                        <input name="InvoiceLines[@i].Description" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Description" />
-
-                                        <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Description" class="text-danger"></span>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <div class="input-group">
-                                        <input name="InvoiceLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(this)" />
-                                        <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">@Model.InvoiceLines.ElementAt(i).Item.SaleUnitNavigation.Symbol</span>
-                                    </div>
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].UnitPrice" data-valmsg-replace="true"></span>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="control-label"></label> *@
-                                        <input name="InvoiceLines[@i].Quantity" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Quantity" oninput="calculateAmount(this)" />
-                                        <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="text-danger"></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <input name="InvoiceLines[@i].DiscountPercentage" class="form-control" value="@Model.InvoiceLines.ElementAt(i).DiscountPercentage" oninput="calculateAmount(this)" />
-                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].DiscountPercentage" data-valmsg-replace="true"></span>
-
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <input name="InvoiceLines[@i].TaxPercentage" class="form-control" value="@Model.InvoiceLines.ElementAt(i).TaxPercentage" oninput="calculateAmount(this)" />
-                                        <input type="hidden" name="InvoiceLines[@i].TaxAmount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).TaxAmount" />
-                                        <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].TaxAmount" data-valmsg-replace="true"></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Amount" class="control-label"></label> *@
-                                        <input name="InvoiceLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
-                                        <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Amount" class="text-danger"></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <!-- Remove button -->
-                                        <button type="button" class="btn btn-outline-danger" onclick="removeTradingDocumentDetail(this)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-
-                                    </div>
-                                </td>
-
-                            </tr>
-                        }
-                        <div id="live-region" aria-live="polite" style="position: absolute; left: -9999px;"></div>
-
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
-        <div class="mb-3">
-            <div class="row">
-                <div id="InvoiceLinesContainer">
-                    <!-- Placeholder for dynamically added rows -->
-                </div>
-                <div class="col text-start">
-                    <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row </button>
-                </div>
-            </div>
-        </div>
-        <div class="mt-5 p-4 bg-light rounded shadow">
-            <div class="row mb-3">
-                <div class="col text-end">
-                    <h5 class="fw-bold text-secondary">Subtotal: <span id="subtotalAmount">0.00</span></h5>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col text-end">
-                    <h5 class="fw-bold text-secondary">Untaxed Amount: <span id="UntaxedAmount">0.00</span></h5>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col text-end">
-                    <h5 class="fw-bold text-secondary">Total: <span id="grandTotalAmount">0.00</span></h5>
-                </div>
-            </div>
-        </div>
-
-
-
-        @* --line code --- *@
 
     </div>
+    @* ---line code-- *@
+    <div class="row  mt-4">
+        <div class="col-md-12">
+            <table id="tradingLinesTable" class="table table-hover borderless-table no-padding-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Item</th>
+                        <th>Description</th>
+                        <th>Unit Price</th>
+                        <th>Quantity</th>
+                        <th>Disc. %</th>
+                        <th>Tax %</th>
+                        <th>Amount</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model?.InvoiceLines?.Count; i++)
+                    {
+                        <tr id="row-@i" tabindex="0"
+                            ondragover="allowDrop(event)"
+                            ondrop="drop(event)"
+                            ondragleave="dragLeave(event)">
+                            <td>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-outline-secondary no-outline drag-handle"
+                                            draggable="true"
+                                            ondragstart="drag(event)"
+                                            ondragend="dragEnd()"
+                                            aria-label="Drag to move row">
+                                        <i class="bi bi-grip-vertical"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    @* <label asp-for="@Model.InvoiceLines.ElementAt(i).ItemId" class="control-label"></label> *@
+                                    <select name="InvoiceLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this)">
+                                        <option value="">-- Select Item --</option>
+
+                                        @ViewData["Item"];
+                                        @foreach (var item in (IEnumerable<Item>)ViewData["Item"] ?? new List<Item>())
+                                        {  var itemViewModel = item as Item;
+
+                                            if (item.Id.ToString() == Model.InvoiceLines.ElementAt(i).ItemId.ToString())
+                                            {
+                                                <option value="@item.Id" data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" selected>@item.Name</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" data-price="@item.Price">@item.Name</option>
+                                            } 
+                                         }
+                                    </select>
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].ItemId" data-valmsg-replace="true"></span>
+
+                                </div>
+                            </td>
+                            <td>
+                                <input type="hidden" name="InvoiceLines[@i].Id" value="@Model.InvoiceLines.ElementAt(i).Id" />
+
+                                <div class="form-group">
+                                    @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Description" class="control-label"></label> *@
+                                    <input name="InvoiceLines[@i].Description" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Description" />
+
+                                    <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Description" class="text-danger"></span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="input-group">
+                                    <input name="InvoiceLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(this)" />
+                                    @* <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">@Model.InvoiceLines.ElementAt(i).Item.SaleUnitNavigation.Symbol</span> *@
+                                    <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">
+                                        @{
+                                            var item2 = ((IEnumerable<Item>)ViewData["Item"]).FirstOrDefault(it => it.Id == Model.InvoiceLines.ElementAt(i).ItemId);
+                                            var symbol = item2?.SaleUnitNavigation?.Symbol ?? string.Empty; // Fallback to empty string if null
+                                        }
+                                        @symbol
+                                    </span>
+                                </div>
+                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].UnitPrice" data-valmsg-replace="true"></span>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Quantity" class="control-label"></label> *@
+                                    <input name="InvoiceLines[@i].Quantity" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Quantity" oninput="calculateAmount(this)" />
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].Quantity" data-valmsg-replace="true"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <input name="InvoiceLines[@i].DiscountPercentage" class="form-control" value="@Model.InvoiceLines.ElementAt(i).DiscountPercentage" oninput="calculateAmount(this)" />
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].DiscountPercentage" data-valmsg-replace="true"></span>
+
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <input name="InvoiceLines[@i].TaxPercentage" class="form-control" value="@Model.InvoiceLines.ElementAt(i).TaxPercentage" oninput="calculateAmount(this)" />
+                                    <input type="hidden" name="InvoiceLines[@i].TaxAmount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).TaxAmount" />
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[@i].TaxAmount" data-valmsg-replace="true"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    @* <label asp-for="@Model.InvoiceLines.ElementAt(i).Amount" class="control-label"></label> *@
+                                    <input name="InvoiceLines[@i].Amount" class="form-control" value="@Model.InvoiceLines.ElementAt(i).Amount" readonly />
+                                    <span asp-validation-for="@Model.InvoiceLines.ElementAt(i).Amount" class="text-danger"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <!-- Remove button -->
+                                    <button type="button" class="btn btn-outline-danger" onclick="removeTradingDocumentDetail(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                </div>
+                            </td>
+
+                        </tr>
+                    }
+                    <div id="live-region" aria-live="polite" style="position: absolute; left: -9999px;"></div>
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    @* --line code --- *@
+    <div class="mb-3">
+        <div class="row">
+            <div id="InvoiceLinesContainer">
+                <!-- Placeholder for dynamically added rows -->
+            </div>
+            <div class="col text-start">
+                <button type="button" class="btn btn-primary" onclick="addTradingDocumentDetail()">Add Row </button>
+            </div>
+        </div>
+    </div>
+    <div class="mt-5 p-4 bg-light rounded shadow">
+        <div class="row mb-3">
+            <div class="col text-end">
+                <h5 class="fw-bold text-secondary">Subtotal: <span id="subtotalAmount">0.00</span></h5>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col text-end">
+                <h5 class="fw-bold text-secondary">Untaxed Amount: <span id="UntaxedAmount">0.00</span></h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-end">
+                <h5 class="fw-bold text-secondary">Total: <span id="grandTotalAmount">0.00</span></h5>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
 </form>
 
 <div>
@@ -310,7 +338,30 @@
             // Log the validator object
             console.log(validator);
         }
+        function validateAtLeastOneLine() {
+            var hasAtLeastOneLine = false;
 
+            // Loop through each row in InvoiceLines and check if any input has a value
+            $('#tradingLinesTable tbody tr').each(function () {
+                $(this).find('input, select, textarea').each(function () {
+                    if ($(this).val().trim() !== "") {
+                        hasAtLeastOneLine = true;
+                        return false; // Break the loop if we find a populated field
+                    }
+                });
+                if (hasAtLeastOneLine) return false; // Exit the outer loop if one line is valid
+            });
+
+            if (!hasAtLeastOneLine) {
+                // Show an error message if no line items are filled in
+                $('#resultContainer').html('<div class="alert alert-danger">Please add at least one line item.</div>');
+                return false; // Prevent form submission
+            }
+
+            // Clear any previous error message if validation passes
+            $('#resultContainer').html('');
+            return true;
+        }
         function submitForm() {
             initializeValidation();
             $.validator.unobtrusive.parse(".target");
@@ -336,6 +387,22 @@
                     // Add more messages as needed
                 };
             });
+            $('input[name^="InvoiceLines["][name$="].Quantity"]').each(function (index) {
+                var fieldName = $(this).attr('name');
+
+                // Ensure that the rules object exists for the current input field
+                if (!validator.settings.rules[fieldName]) {
+                    validator.settings.rules[fieldName] = {}; // Create rules object if it doesn't exist
+                }
+
+                // Add new validation rules for Quantity
+                validator.settings.rules[fieldName]['required'] = true; // Field must not be empty
+
+                // Add messages for the new validation rules
+                validator.settings.messages[fieldName] = {
+                    required: "Quantity is required." // Custom message for required rule
+                };
+            });
 
             // Validate Discount Percentage fields
             $('input[name^="InvoiceLines["][name$="].DiscountPercentage"]').each(function (index) {
@@ -355,6 +422,8 @@
                 };
 
             });
+
+           
 
             // Validate Discount Percentage fields
             $('input[name^="InvoiceLines["][name$="].TaxPercentage"]').each(function (index) {
@@ -463,8 +532,7 @@
 
         });
         function validateForm() {
-            // Assuming you're using jQuery Validate for client-side validation
-            return $('#tradingForm').valid(); // Replace 'yourFormId' with the ID of your form
+            return $('#tradingForm').valid() && validateAtLeastOneLine(); 
         }
         // Global variable to keep track of the current index
 
@@ -490,79 +558,80 @@
             newRow.addEventListener('dragleave', dragLeave);
 
             newRow.innerHTML = `
-                                                         <td>
-                                                            <div class="form-group">
-                                                                <!-- Drag handle button at the start of the row -->
-                                                                 <button type="button" class="btn btn-outline-secondary no-outline drag-handle"
-                                                                        draggable="true"
-                                                                        ondragstart="drag(event)"
-                                                                        ondragend="dragEnd()"
-                                                                        aria-label="Drag to move row">
-                                                                    <i class="bi bi-grip-vertical"></i>
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="form-group">
-                                                                <select name="InvoiceLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this)">
-                                                                    <option value="">-- Select Item --</option>
+                                                                         <td>
+                                                                            <div class="form-group">
+                                                                                <!-- Drag handle button at the start of the row -->
+                                                                                 <button type="button" class="btn btn-outline-secondary no-outline drag-handle"
+                                                                                        draggable="true"
+                                                                                        ondragstart="drag(event)"
+                                                                                        ondragend="dragEnd()"
+                                                                                        aria-label="Drag to move row">
+                                                                                    <i class="bi bi-grip-vertical"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <select name="InvoiceLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this)">
+                                                                                    <option value="">-- Select Item --</option>
         @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
         {
-                                                                                                <option data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" value="@item.Id">@item.Name</option>
+                                                                                                                        <option data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" value="@item.Id">@item.Name</option>
         }
-                                                                </select>
-                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="form-group">
-                                                                <input name="InvoiceLines[${currentIndex}].Description" class="form-control" />
-                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].Description" class="text-danger"></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="input-group">
-                                                                        <input name="InvoiceLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(this)" />
-                                                                <span class="input-group-text" name="InvoiceLines[${currentIndex}].Item.SaleUnitNavigation.Symbol"></span>
-                                                            </div>
-                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
-                                                        </td>
-                                                        <td>
-                                                            <div class="form-group">
-                                                                        <input name="InvoiceLines[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(this)" />
-                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].Quantity" class="text-danger"></span>
-                                                            </div>
-                                                        </td>
-                                                         <td>
-                                                            <div class="form-group">
-                                                                        <input name="InvoiceLines[${currentIndex}].DiscountPercentage" value="0" class="form-control" oninput="calculateAmount(this)" />
-                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].DiscountPercentage" data-valmsg-replace="true"></span>
-                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].DiscountPercentage" class="text-danger"></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="form-group">
-                                                                        <input name="InvoiceLines[${currentIndex}].TaxPercentage" value="0" class="form-control" oninput="calculateAmount(this)" />
-                                                                <input type="hidden" name="InvoiceLines[${currentIndex}].TaxAmount" class="form-control"  />
-                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].TaxPercentage" data-valmsg-replace="true"></span>
-                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].TaxPercentage" class="text-danger"></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="form-group">
-                                                                <input name="InvoiceLines[${currentIndex}].Amount" class="form-control" readonly />
-                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].Amount" class="text-danger"></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="form-group">
-                                                                <!-- Remove button -->
-                                                                <button type="button" class="btn btn-outline-danger" onclick="removeTradingDocumentDetail(this)">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    `;
+                                                                                </select>
+                                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input name="InvoiceLines[${currentIndex}].Description" class="form-control" />
+                                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].Description" class="text-danger"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="input-group">
+                                                                                        <input name="InvoiceLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(this)" />
+                                                                                <span class="input-group-text" name="InvoiceLines[${currentIndex}].Item.SaleUnitNavigation.Symbol"></span>
+                                                                            </div>
+                                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                        <input name="InvoiceLines[${currentIndex}].Quantity" class="form-control" oninput="calculateAmount(this)" />
+                                                                               
+                                                                            <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].Quantity" data-valmsg-replace="true"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                         <td>
+                                                                            <div class="form-group">
+                                                                                        <input name="InvoiceLines[${currentIndex}].DiscountPercentage" value="0" class="form-control" oninput="calculateAmount(this)" />
+                                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].DiscountPercentage" data-valmsg-replace="true"></span>
+                                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].DiscountPercentage" class="text-danger"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                        <input name="InvoiceLines[${currentIndex}].TaxPercentage" value="0" class="form-control" oninput="calculateAmount(this)" />
+                                                                                <input type="hidden" name="InvoiceLines[${currentIndex}].TaxAmount" class="form-control"  />
+                                                                                <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].TaxPercentage" data-valmsg-replace="true"></span>
+                                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].TaxPercentage" class="text-danger"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <input name="InvoiceLines[${currentIndex}].Amount" class="form-control" readonly />
+                                                                                <span asp-validation-for="InvoiceLines[${currentIndex}].Amount" class="text-danger"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-group">
+                                                                                <!-- Remove button -->
+                                                                                <button type="button" class="btn btn-outline-danger" onclick="removeTradingDocumentDetail(this)">
+                                                                                    <i class="bi bi-trash"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </td>
+                                                                    `;
 
             // Append the new row to the table body
             tableBody.appendChild(newRow);
@@ -582,7 +651,7 @@
 
         // Function to calculate Amount based on UnitPrice and Quantity
         function calculateAmount(element) {
-            
+
             // Find the row that contains the element that triggered the change
             const rowElement = element.closest('tr');
 
@@ -640,17 +709,17 @@
             var CurrencyElement = document.getElementById('Currency');
             var grandTotalElement = document.getElementById('grandTotalAmount');
             if (grandTotalElement) {
-                grandTotalElement.textContent = formatNumberWithCommas(grandTotal.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
+                grandTotalElement.textContent = formatNumberWithCommas(grandTotal.toFixed(2)) + '/- ' + CurrencyElement.value; // Format the total with two decimal places
             }
             var subtotalAmountElement = document.getElementById('subtotalAmount');
 
             if (subtotalAmountElement) {
-                subtotalAmountElement.textContent = formatNumberWithCommas(subTotal.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
+                subtotalAmountElement.textContent = formatNumberWithCommas(subTotal.toFixed(2)) + '/-  ' + CurrencyElement.value; // Format the total with two decimal places
             }
             var untaxedAmountElement = document.getElementById('UntaxedAmount');
 
             if (untaxedAmountElement) {
-                untaxedAmountElement.textContent = formatNumberWithCommas(untaxedAmount.toFixed(2)) + CurrencyElement.value; // Format the total with two decimal places
+                untaxedAmountElement.textContent = formatNumberWithCommas(untaxedAmount.toFixed(2)) + '/-  ' + CurrencyElement.value; // Format the total with two decimal places
             }
         }
 

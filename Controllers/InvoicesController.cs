@@ -117,7 +117,7 @@ namespace TradingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int? id, [Bind("Id, CustomId, DocDate, StakeholderId, BankName, AccountTitle, DueDate,Description,InvoiceId,InvoiceLines,Transaction.CustomId, DocStatusInput")] Invoice entity)
+        public async Task<IActionResult> Create(int? id, [Bind("Id, CustomId, DocDate, StakeholderId, BankName, AccountTitle, DueDate,Description,InvoiceId,InvoiceLines,Transaction.CustomId, DocStatusInput, Terms, Notes")] Invoice entity)
         {
             if (!ModelState.IsValid)
             {
@@ -165,6 +165,7 @@ namespace TradingApp.Controllers
                             await dbTransaction.RollbackAsync();
                             ModelState.AddModelError(string.Empty, result.Message);
                             PopulateViewData(entity);
+                            //ViewData["Item"] = _context.Items.Include(x => x.SaleUnitNavigation).ToList();
                             return View(entity); // Return to the page with the error message
                         }
                     }
@@ -174,9 +175,14 @@ namespace TradingApp.Controllers
                         var result = await AddInvoiceAsync(entity, userId);
                         if (!result.Success)
                         {
+                            
                             await dbTransaction.RollbackAsync();
                             ModelState.AddModelError(string.Empty, result.Message);
                             PopulateViewData(entity);
+                           
+                        
+                           
+
                             return View(entity); // Return to the page with the error message
                         }
                     }
@@ -478,6 +484,8 @@ namespace TradingApp.Controllers
             invoice.UnreconciledAmount = param.UnreconciledAmount;
             invoice.Currency = param.Currency;
             invoice.OrganizationId = param.OrganizationId;
+            invoice.Terms = param.Terms;
+            invoice.Notes = param.Notes;
 
 
 
@@ -596,9 +604,7 @@ namespace TradingApp.Controllers
 
         private void PopulateViewData(Invoice invoice)
         {
-            ViewData["PurchaseOrderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.PurchaseOrderId);
-            ViewData["QuoteId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.QuoteId);
-            ViewData["Rfqid"] = new SelectList(_context.Invoices, "Id", "Id", invoice.Rfqid);
+            
             ViewData["SalesOderId"] = new SelectList(_context.Invoices, "Id", "Id", invoice.SalesOderId);
             ViewData["StakeholderId"] = new SelectList(_context.StakeholderTypes, "Id", "Id", invoice.StakeholderId);
             ViewData["Stakeholder"] = new SelectList(_context.Stakeholders, "Id", "Name", invoice.Stakeholder);
@@ -737,9 +743,6 @@ namespace TradingApp.Controllers
             return await _context.Invoices.AsNoTracking()
                 .Include(t => t.InvoiceLines)
                     .ThenInclude(t => t.Item)
-                .Include(t => t.PurchaseOrder)
-                .Include(t => t.Quote)
-                .Include(t => t.Rfq)
                 .Include(t => t.SalesOder)
                 .Include(t => t.Stakeholder)
                 .Include(t => t.Organization)

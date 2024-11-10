@@ -87,24 +87,19 @@ namespace TradingApp.Models
         [Display(Name = "Status")]
         public byte? DocStatus { get; set; }
 
+        [StringLength(1000, ErrorMessage = "Terms cannot exceed 1000 characters.")]
+        public string? Terms { get; set; }
+        [StringLength(1000, ErrorMessage = "Notes cannot exceed 1000 characters.")]
+        public string? Notes { get; set; }
 
-        [JsonIgnore]
-        public virtual ICollection<Invoice> InverseInvoice { get; set; } = new List<Invoice>();
 
-        [JsonIgnore]
-        public virtual ICollection<Invoice> InversePurchaseOrder { get; set; } = new List<Invoice>();
-
-        [JsonIgnore]
-        public virtual ICollection<Invoice> InverseQuote { get; set; } = new List<Invoice>();
-
-        [JsonIgnore]
-        public virtual ICollection<Invoice> InverseRfq { get; set; } = new List<Invoice>();
+       
 
         [JsonIgnore]
         public virtual ICollection<Invoice> InverseSalesOder { get; set; } = new List<Invoice>();
         [Required]
         [AtLeastOneItem]
-        public virtual ICollection<InvoiceLine> TransectionLines { get; set; } = new List<InvoiceLine>();
+        public virtual ICollection<InvoiceLine> InvoiceLines { get; set; } = new List<InvoiceLine>();
         [Display(Name = "Customer")]
         public virtual Stakeholder? Stakeholder { get; set; }
 

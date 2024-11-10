@@ -245,25 +245,31 @@
             </td> *@
                 <td>
                     <div class="btn-group" role="group">
-                        <a asp-action="Create" asp-route-id="@item.Id" class="btn  btn-outline-secondary no-outline" title="Edit">
+                        <a asp-action="Create" asp-route-id="@item.Id" class="btn  btn-outline-secondary " title="Edit">
                             <i class="bi bi-pencil-fill"></i> 
                         </a>
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn  btn-outline-secondary no-outline" title="Details">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn  btn-outline-secondary " title="Details">
                             <i class="bi bi-info-circle-fill"></i> 
                         </a>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-secondary no-outline" title="Delete"
+                       
+                            <button type="button" class="btn btn-outline-secondary" title="Delete"
                                     data-bs-toggle="modal" data-bs-target="#deleteModal"
                                     data-id="@item.Id">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
-                        </div>
-                        @if (item.DocStatus == (byte)DocumentStatus.Finalized)
-                        {
-                            <a asp-controller="Receipts" asp-action="Create" asp-route-invoiceId="@item.Id" class="btn  btn-outline-secondary no-outline" title="Create Receipt">
-                                <i class="bi bi-cash"></i> 
-                            </a>
+
+                        @{
+                            var isDisabled = item.DocStatus != (byte)DocumentStatus.Finalized;
                         }
+                        <a asp-controller="Receipts"
+                           asp-action="Create"
+                           asp-route-invoiceId="@item.Id"
+                           class="btn btn-outline-secondary @(isDisabled ? "disabled" : "")"
+                           title="Create Receipt"
+                           aria-disabled="@(isDisabled)">
+                            <i class="bi bi-cash"></i>
+                        </a>
+
                     </div>
                     
                 </td>

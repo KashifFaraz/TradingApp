@@ -27,7 +27,7 @@ public partial class Item
 
     public int? ProductBrandId { get; set; }
 
-    public virtual ICollection<InvoiceLine> InvoiceLines { get; set; } = new List<InvoiceLine>();
+   // public virtual ICollection<InvoiceLine> InvoiceLines { get; set; } = new List<InvoiceLine>();
 
     public virtual ProductBrand? ProductBrand { get; set; }
 

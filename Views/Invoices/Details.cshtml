@@ -173,6 +173,8 @@
                
                 <td>
                     @Html.DisplayFor(modelItem => item.Item.Name)
+                    <br/>
+                    @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Description)
@@ -224,6 +226,31 @@
     </div>
 </div>
 
+<div class="mt-4 w-100">
+    @if (!string.IsNullOrEmpty(Model.Terms))
+    {
+        <div class="row">
+            <div class="col-9">
+                <h6>Terms and Conditions</h6>
+                <p class="small mb-4">
+                    @Html.DisplayFor(model => model.Terms)
+                </p>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Notes))
+    {
+        <div class="row">
+            <div class="col-9">
+                <h6>Notes</h6>
+                <p class="small">
+                    @Html.DisplayFor(model => model.Notes)
+                </p>
+            </div>
+        </div>
+    }
+</div>
 
 <div>
     <a asp-action="Create" asp-route-id="@Model?.Id">Edit</a> |

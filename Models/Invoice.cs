@@ -49,6 +49,8 @@ public partial class Invoice: BaseEntity
     public int? OrganizationId { get; set; }
     public decimal? TaxAmount { get; set; }
     public decimal? TotalAmount { get; set; }
+    public string? Terms { get; set; }
+    public string? Notes { get; set; }
     
 
 
@@ -56,11 +58,7 @@ public partial class Invoice: BaseEntity
 
     public virtual AppUser? EditedByNavigation { get; set; }
 
-    public virtual ICollection<Invoice> InversePurchaseOrder { get; set; } = new List<Invoice>();
-
-    public virtual ICollection<Invoice> InverseQuote { get; set; } = new List<Invoice>();
-
-    public virtual ICollection<Invoice> InverseRfq { get; set; } = new List<Invoice>();
+   
 
     public virtual ICollection<Invoice> InverseSalesOder { get; set; } = new List<Invoice>();
 
@@ -70,11 +68,8 @@ public partial class Invoice: BaseEntity
 
     public virtual ICollection<PaymentReconciliation> PaymentReconciliations { get; set; } = new List<PaymentReconciliation>();
 
-    public virtual Invoice? PurchaseOrder { get; set; }
 
-    public virtual Invoice? Quote { get; set; }
 
-    public virtual Invoice? Rfq { get; set; }
 
     public virtual Invoice? SalesOder { get; set; }
 

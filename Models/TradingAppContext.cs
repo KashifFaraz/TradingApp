@@ -217,6 +217,8 @@ public partial class TradingAppContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Terms).HasMaxLength(1000);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
             entity.Property(e => e.DocDate).HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("datetime");
             entity.Property(e => e.EditedOn).HasColumnType("datetime");
@@ -239,17 +241,7 @@ public partial class TradingAppContext : DbContext
                 .HasForeignKey(d => d.OrganizationId)
                 .HasConstraintName("FK_TradingDocument_Organization");
 
-            entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.InversePurchaseOrder)
-                .HasForeignKey(d => d.PurchaseOrderId)
-                .HasConstraintName("FK_TradingDocument_TradingDocument2");
-
-            entity.HasOne(d => d.Quote).WithMany(p => p.InverseQuote)
-                .HasForeignKey(d => d.QuoteId)
-                .HasConstraintName("FK_TradingDocument_TradingDocument");
-
-            entity.HasOne(d => d.Rfq).WithMany(p => p.InverseRfq)
-                .HasForeignKey(d => d.Rfqid)
-                .HasConstraintName("FK_TradingDocument_TradingDocument1");
+           
 
             entity.HasOne(d => d.SalesOder).WithMany(p => p.InverseSalesOder)
                 .HasForeignKey(d => d.SalesOderId)
@@ -275,7 +267,7 @@ public partial class TradingAppContext : DbContext
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.DiscountPercentage).HasColumnType("decimal(18, 2)").HasDefaultValue(0);
 
-            entity.HasOne(d => d.Item).WithMany(p => p.InvoiceLines)
+            entity.HasOne(d => d.Item).WithMany()
                 .HasForeignKey(d => d.ItemId)
                 .HasConstraintName("FK_TradingDocumentDetails_Item");
 

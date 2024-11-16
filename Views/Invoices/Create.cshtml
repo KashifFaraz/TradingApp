@@ -33,7 +33,16 @@
                     <!-- Save button -->
 
                     <input type="submit" value="Save" class="btn btn-primary me-2" id="saveDraftButton" />
-                    <input type="submit" value="Finalize" class="btn btn-primary" id="saveButton" />
+                    <input type="submit" value="Finalize" class="btn btn-primary me-2 " id="saveButton" />
+                }
+                 @if (Model?.Id == null || Model.Id == 0)
+                {
+                <form asp-action="Import" method="post" enctype="multipart/form-data" style="display:inline-block;">
+                    <label class="btn btn-primary shadow-sm me-2">
+                        <input type="file" name="importFile" onchange="this.form.submit()" style="display: none;">
+                        <i class="fas fa-file-upload"></i> Import Invoices
+                    </label>
+                </form>
                 }
             </div>
         </div>
@@ -167,17 +176,17 @@
                                     <select name="InvoiceLines[@i].ItemId" class="form-control" onchange="updateUnitPrice(this)">
                                         <option value="">-- Select Item --</option>
 
-                                        @ViewData["Item"];
+                                        
                                         @foreach (var item in (IEnumerable<Item>)ViewData["Item"] ?? new List<Item>())
                                         {  var itemViewModel = item as Item;
 
                                             if (item.Id.ToString() == Model.InvoiceLines.ElementAt(i).ItemId.ToString())
                                             {
-                                                <option value="@item.Id" data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" selected>@item.Name</option>
+                                                <option value="@item.Id" data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item?.SaleUnitNavigation?.Symbol" selected>@item.Name</option>
                                             }
                                             else
                                             {
-                                                <option value="@item.Id" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" data-price="@item.Price">@item.Name</option>
+                                                <option value="@item.Id" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item?.SaleUnitNavigation?.Symbol" data-price="@item.Price">@item.Name</option>
                                             } 
                                          }
                                     </select>
@@ -200,7 +209,7 @@
                                 <div class="input-group">
                                     <input name="InvoiceLines[@i].UnitPrice" class="form-control" value="@Model.InvoiceLines.ElementAt(i).UnitPrice" oninput="calculateAmount(this)" />
                                     @* <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">@Model.InvoiceLines.ElementAt(i).Item.SaleUnitNavigation.Symbol</span> *@
-                                    <span class="input-group-text" name="InvoiceLines[@i].Item.SaleUnitNavigation.Symbol">
+                                    <span class="input-group-text" name="InvoiceLines[@i].Item?.SaleUnitNavigation?.Symbol">
                                         @{
                                             var item2 = ((IEnumerable<Item>)ViewData["Item"]).FirstOrDefault(it => it.Id == Model.InvoiceLines.ElementAt(i).ItemId);
                                             var symbol = item2?.SaleUnitNavigation?.Symbol ?? string.Empty; // Fallback to empty string if null
@@ -574,9 +583,9 @@
                                                                             <div class="form-group">
                                                                                 <select name="InvoiceLines[${currentIndex}].ItemId" class="form-control" onchange="updateUnitPrice(this)">
                                                                                     <option value="">-- Select Item --</option>
-        @foreach (var item in (IEnumerable<Item>)ViewData["Item"])
+        @foreach (var item in (IEnumerable<Item>)ViewData["Item"] ?? new List<Item>())
         {
-                                                                                                                        <option data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item.SaleUnitNavigation.Symbol" value="@item.Id">@item.Name</option>
+                                                                                      <option data-price="@item.Price" data-SaleUnitId="@item.SaleUnit" data-SaleUnit="@item?.SaleUnitNavigation?.Symbol" value="@item.Id">@item.Name</option>
         }
                                                                                 </select>
                                                                                 <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].ItemId" data-valmsg-replace="true"></span>
@@ -591,7 +600,7 @@
                                                                         <td>
                                                                             <div class="input-group">
                                                                                         <input name="InvoiceLines[${currentIndex}].UnitPrice" class="form-control" oninput="calculateAmount(this)" />
-                                                                                <span class="input-group-text" name="InvoiceLines[${currentIndex}].Item.SaleUnitNavigation.Symbol"></span>
+                                                                                <span class="input-group-text" name="InvoiceLines[${currentIndex}].Item?.SaleUnitNavigation?.Symbol"></span>
                                                                             </div>
                                                                                 <span class="text-danger field-validation-valid" data-valmsg-for="InvoiceLines[${currentIndex}].UnitPrice" data-valmsg-replace="true"></span>
                                                                         </td>

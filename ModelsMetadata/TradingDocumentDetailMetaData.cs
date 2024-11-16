@@ -21,7 +21,7 @@ namespace TradingApp.Models
         [DisplayFormat(DataFormatString = "{0:N}")]
         public decimal? Amount { get; set; }
         [Required]
-        public int? Quantity { get; set; }
+        public decimal? Quantity { get; set; }
 
         [Display(Name = "Discount Percentage")]
 

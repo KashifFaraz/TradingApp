@@ -18,7 +18,7 @@ public partial class InvoiceLine : BaseEntity
     public decimal? SubTotal { get; set; }
     public decimal? Amount { get; set; }
 
-    public int? Quantity { get; set; }
+    public decimal? Quantity { get; set; }
     public decimal DiscountPercentage { get; set; }
     public  decimal? TaxPercentage { get; set; }
     public  decimal? TaxAmount { get; set; }

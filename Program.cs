@@ -10,8 +10,10 @@ using System.Text.Json.Serialization;
 using TradingApp.AutoMapper;
 using TradingApp.Data;
 using TradingApp.Filter;
+using TradingApp.MIddlewears;
 using TradingApp.Models;
 using TradingApp.Models.Config;
+using TradingApp.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Register AutoMapper with the mapping profiles
 builder.Services.AddAutoMapper(typeof(MappingProfile));  // Register AutoMapper with your profile
 
-
+builder.Services.AddScoped<InvoiceRepository>();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -115,6 +117,8 @@ builder.Services.Configure<MvcOptions>(options =>
 
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

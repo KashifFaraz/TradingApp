@@ -72,6 +72,24 @@ public partial class TradingAppContext : DbContext
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=.;Database=Dev01-TradingApp;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True");
 
+
+    private static LambdaExpression CreateIsActiveFilterExpression(Type entityType)
+    {
+        var parameter = Expression.Parameter(entityType, "e");
+        var property = Expression.Property(parameter, "IsActive");
+
+        // Check if IsActive is true, handling null values correctly
+        var trueConstant = Expression.Constant(true, typeof(bool));
+
+        // Create an expression that checks if IsActive has a value and that value is true
+        var hasValueExpression = Expression.Property(property, "HasValue");
+        var valueExpression = Expression.Property(property, "Value");
+        var isTrueExpression = Expression.Equal(valueExpression, trueConstant);
+        var filterExpression = Expression.AndAlso(hasValueExpression, isTrueExpression);
+
+        var filter = Expression.Lambda(filterExpression, parameter);
+        return filter;
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
@@ -82,6 +100,13 @@ public partial class TradingAppContext : DbContext
             if (entityType.ClrType.GetProperty("TenantId") != null)
             {
                 modelBuilder.Entity(entityType.ClrType).Property<int>("TenantId");
+            }
+        }
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (entityType.ClrType.GetProperty("IsActive") != null)
+            {
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(CreateIsActiveFilterExpression(entityType.ClrType));
             }
         }
 
@@ -260,6 +285,7 @@ public partial class TradingAppContext : DbContext
         {
 
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Quantity).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TaxPercentage).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TaxAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Description).HasMaxLength(500);

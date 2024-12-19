@@ -35,7 +35,8 @@ namespace TradingApp.MIddlewears
             var response = new
             {
                 Error = "An error occurred while processing your request.",
-                Details = exception.Message // Be cautious exposing exception details in production
+                Details = exception.Message, // Be cautious exposing exception details in production
+                StackTrace = exception.StackTrace
             };
 
             return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));

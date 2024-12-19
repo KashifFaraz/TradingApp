@@ -1,5 +1,5 @@
 ﻿@model TradingApp.Models.Item
-
+@using System.IO
 @{
     ViewData["Title"] = "Details";
 }
@@ -16,11 +16,72 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Code)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Code)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Barcode)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Barcode)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.QRCode)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.QRCode)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Color)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Color)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Material)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Material)
+        </dd>
+        
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Size)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Size)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Length)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Length)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Height)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Height)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Width)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Width)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Weight)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Weight)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.CreatedBy)
@@ -29,10 +90,10 @@
             @Html.DisplayFor(model => model.CreatedBy)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CraetedOn)
+            @Html.DisplayNameFor(model => model.CreatedOn)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CraetedOn)
+            @Html.DisplayFor(model => model.CreatedOn)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.EditedBy)
@@ -52,7 +113,34 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.SaleUnit)
         </dd>
-       
+
+
+        <!-- Displaying the product thumbnail -->
+        @if (Model.Thumbnail != null)
+        {
+            <img style="max-width: 100px; max-height: 100px;" src="data:image/jpeg;base64,@Model.Thumbnail" alt="Product Thumbnail" />
+        }
+
+        @{
+            var mediaAssets = Model.ProductMediaAssets?.Split(',') ?? new string[0];
+        }
+        @foreach (var filePath in mediaAssets)
+        {
+            var extension = System.IO.Path.GetExtension(filePath).ToLower();
+
+            if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+            {
+                <img src="@filePath" alt="Product Image" style="max-width: 100px; max-height: 100px;" />
+            }
+            else if (extension == ".mp4" || extension == ".avi" || extension == ".mov")
+            {
+                <video controls width="200">
+                    <source src="@filePath" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            }
+        }
+
     </dl>
 </div>
 <div>

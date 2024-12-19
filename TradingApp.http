@@ -1,0 +1,6 @@
+﻿@TradingApp_HostAddress = http://localhost:5220
+
+@itemId=0
+DELETE {{TradingApp_HostAddress}}/items/{{itemId}}/logo
+
+###

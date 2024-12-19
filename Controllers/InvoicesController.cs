@@ -222,13 +222,10 @@ namespace TradingApp.Controllers
             if (entity.DocStatus != (byte)DocumentStatus.Finalized)
             {
                 return BadRequest(new { Errors = "Finalized document can be reset to draft." });
-
             }
 
             if (entity.PaymentReconciliationStatus != (byte)PaymentReconciliationStatus.Unreconciled)
             {
-
-
                 return BadRequest(new { Errors = "Only Unreconciled document can be reset to draft." });
             }
 

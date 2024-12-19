@@ -306,11 +306,16 @@ public partial class TradingAppContext : DbContext
         {
             entity.ToTable("Item");
 
-            entity.Property(e => e.CraetedOn).HasColumnType("datetime");
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.EditedOn).HasColumnType("datetime");
             entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Code).HasMaxLength(100);
+            entity.Property(e => e.Barcode).HasMaxLength(50);
+            entity.Property(e => e.QRCode).HasMaxLength(255);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Weight).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Width).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Height).HasColumnType("decimal(18, 0)");
+            entity.Property(e => e.Length).HasColumnType("decimal(18, 0)");
 
             entity.HasOne(d => d.ProductBrand).WithMany(p => p.Items)
                 .HasForeignKey(d => d.ProductBrandId)
